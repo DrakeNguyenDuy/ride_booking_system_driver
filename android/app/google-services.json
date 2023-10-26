@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "795911225811",
+    "project_id": "ridebookingproject-ff01d",
+    "storage_bucket": "ridebookingproject-ff01d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:795911225811:android:d59c8368b53543d850af26",
+        "android_client_info": {
+          "package_name": "com.example.ride_booking_system"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDy3nJtg4Ku1E9Lov7Pe9VtJ9S03vVp48Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
