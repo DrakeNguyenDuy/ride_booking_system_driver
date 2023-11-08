@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_font.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_font.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 
 class TextStyleApp {
   static TextStyle tsHeader = TextStyle(

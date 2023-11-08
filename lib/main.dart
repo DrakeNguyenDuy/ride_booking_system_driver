@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/presentations/flash_screen.dart';
-import 'package:ride_booking_system/routes.dart';
+import 'package:ride_booking_system_driver/presentations/flash_screen.dart';
+import 'package:ride_booking_system_driver/routes.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
@@ -25,9 +25,6 @@ class MyApp extends StatelessWidget {
       ],
       supportedLocales: const [Locale("en"), Locale("vi")],
       theme: ThemeData(
-        // bottomSheetTheme: const BottomSheetThemeData(
-        //   backgroundColor: ColorPalette.primaryColor,
-        // ),
         primarySwatch: Colors.blue,
       ),
       home: const FlashScreen(),

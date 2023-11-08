@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/variables.dart';
-import 'package:ride_booking_system/core/widgets/loading.dart';
-import 'package:ride_booking_system/presentations/login.dart';
-import 'package:ride_booking_system/presentations/main_app.dart';
+import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/widgets/loading.dart';
+import 'package:ride_booking_system_driver/presentations/login.dart';
+import 'package:ride_booking_system_driver/presentations/main_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class FlashScreen extends StatefulWidget {

@@ -1,7 +1,7 @@
 //style for button ...
 import 'package:flutter/cupertino.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_font.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_font.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 
 class MainStyle {
   //stye for texts
@@ -48,5 +48,4 @@ class MainStyle {
       fontWeight: FontWeight.w300,
       fontFamily: AssetsFont.fontMonterrat);
   //border
-
 }

@@ -1,6 +1,6 @@
 {
-    "name": "ride_booking_system",
-    "short_name": "ride_booking_system",
+    "name": "ride_booking_system_driver",
+    "short_name": "ride_booking_system_driver",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

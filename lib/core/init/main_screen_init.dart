@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_images.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/data/model/bottom_nav_bar_item_model.dart';
-import 'package:ride_booking_system/data/model/category_model.dart';
-import 'package:ride_booking_system/data/model/item_small_model.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_images.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/data/model/bottom_nav_bar_item_model.dart';
+import 'package:ride_booking_system_driver/data/model/category_model.dart';
+import 'package:ride_booking_system_driver/data/model/item_small_model.dart';
 
 //list bottom navbar item
 List<BottomNavBarItemModel> listItemNavbar = [

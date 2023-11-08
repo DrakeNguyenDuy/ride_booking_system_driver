@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_font.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/constants/constants/font_size_constanst.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_font.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/font_size_constanst.dart';
 
 //đang viết chức năng check kiểm tra đầu vào của giá trị còn đang lở dở
 class InputLable extends StatelessWidget {

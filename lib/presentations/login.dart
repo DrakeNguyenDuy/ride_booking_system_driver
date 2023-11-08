@@ -1,19 +1,19 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_progress/loading_progress.dart';
-import 'package:ride_booking_system/application/authentication_service.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_images.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/constants/constants/dimension_constanst.dart';
-import 'package:ride_booking_system/core/constants/constants/font_size_constanst.dart';
-import 'package:ride_booking_system/core/constants/variables.dart';
-import 'package:ride_booking_system/core/style/main_style.dart';
-import 'package:ride_booking_system/core/widgets/text_field_widget.dart';
-import 'package:ride_booking_system/data/model/Personal.dart';
-import 'package:ride_booking_system/presentations/main_app.dart';
+import 'package:ride_booking_system_driver/application/authentication_service.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_images.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/font_size_constanst.dart';
+import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/style/main_style.dart';
+import 'package:ride_booking_system_driver/core/widgets/text_field_widget.dart';
+import 'package:ride_booking_system_driver/presentations/main_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -25,14 +25,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // bool _isLogged = false;
   final userNameController = TextEditingController();
   final passwordController = TextEditingController();
   AuthenticationService authenticationService = AuthenticationService();
   @override
   void initState() {
-    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.leanBack);
     super.initState();
+  }
+
+  void stop(String message) {
+    LoadingProgress.stop(context);
+    Fluttertoast.showToast(
+        backgroundColor: Colors.amberAccent, msg: message, webPosition: "top");
   }
 
   void _loggin() async {
@@ -44,19 +48,26 @@ class _LoginScreenState extends State<LoginScreen> {
         final body = jsonDecode(res.body);
         String statusCode = body['status'];
         if (statusCode.compareTo("ERROR") == 0) {
-          LoadingProgress.stop(context);
-          Fluttertoast.showToast(
-              backgroundColor: Colors.amberAccent,
-              msg: body['data']['message'],
-              webPosition: "top");
+          stop(body['data']['message']);
         }
         var userInfo = body['data']['userInfo'];
-        PersonalInfor personalInfor = mapperJson2Model(userInfo);
-        // final SharedPreferences sp =
+        String role = userInfo["roleModel"]["name"];
+        if (role != Varibales.ROLE_DRIVER) {
+          stop(Varibales.YOU_ARE_NOT_A_DRIVER);
+        }
         await SharedPreferences.getInstance().then((ins) {
           ins.setString(Varibales.ACCESS_TOKEN, body['data']['accessToken']);
+          ins.setInt(Varibales.DRIVER_ID, userInfo["personModel"]["userId"]);
+          ins.setString(Varibales.NAME_USER, userInfo["personModel"]["name"]);
           ins.setString(
-              Varibales.PERSONAL_INFO, jsonEncode(personalInfor.toString()));
+              Varibales.GENDER_USER, userInfo["personModel"]["gender"]);
+          ins.setString(Varibales.PHONE_NUMBER_USER,
+              userInfo["personModel"]["phoneNumber"]);
+          ins.setString(
+              Varibales.AVATAR_USER, userInfo["personModel"]["avatar"]);
+          ins.setString(Varibales.ADDRESS, userInfo["personModel"]["address"]);
+          ins.setString(Varibales.EMAIL, userInfo["personModel"]["email"]);
+          ins.setBool(Varibales.IS_CONNECT, false);
         });
         LoadingProgress.stop(context);
         Navigator.pushAndRemoveUntil(
@@ -66,29 +77,9 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         LoadingProgress.stop(context);
         Fluttertoast.showToast(
-            msg: "Username or Password incorrect!", webPosition: "top");
-        // LoadingProgress.stop(context);
+            msg: "Tên đăng nhập hoặc mật khẩu không đúng!", webPosition: "top");
       }
     });
-    // Navigator.pushAndRemoveUntil(context,
-    //     MaterialPageRoute(builder: (_) => const MainApp()), (route) => false);
-  }
-
-  PersonalInfor mapperJson2Model(dynamic userInfoJson) {
-    return PersonalInfor(
-      userInfoJson["personModel"]["personId"],
-      userInfoJson["personModel"]["name"],
-      userInfoJson["personModel"]["gender"],
-      userInfoJson["personModel"]["phoneNumber"],
-      userInfoJson["personModel"]["email"],
-      userInfoJson["personModel"]["address"],
-      userInfoJson["personModel"]["citizenId"],
-      userInfoJson["personModel"]["avatar"],
-      userInfoJson["username"],
-      userInfoJson["enabled"],
-      userInfoJson["roleModel"]["roleId"],
-      userInfoJson["roleModel"]["name"],
-    );
   }
 
   @override
@@ -112,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                   children: [
                     Text(
-                      "Let's First Go Login",
+                      "Đăng Nhập Tài Xế",
                       style: MainStyle.textStyle1.copyWith(
                         fontWeight: FontWeight.w800,
                         fontSize: fs_3 * 2,
@@ -120,11 +111,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       textAlign: TextAlign.center,
                     ),
                     TextFieldWidget(
-                      nameLable: "User Name",
+                      nameLable: "Tên đăng nhập",
                       controller: userNameController,
                     ),
                     TextFieldWidget(
-                      nameLable: "Password",
+                      nameLable: "Mật khẩu",
                       controller: passwordController,
                       typePassword: true,
                     ),
@@ -136,24 +127,15 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ColorPalette.primaryColor,
-                            // padding: const EdgeInsets.all(15.0),
                           ),
                           onPressed: _loggin,
                           child: Text(
-                            "Login",
+                            "Đăng Nhập",
                             style: MainStyle.textStyle5,
                           ),
                         )),
-                    Text(
-                      "Forgot password",
-                      style: MainStyle.textStyle5.copyWith(
-                        color: ColorPalette.primaryColor,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
                   ],
                 )),
-                // Expanded(child: null)
               ],
             ),
           ),
@@ -167,17 +149,3 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 }
-
-// const Text("Hãy đăng nhập đi",
-//           style: TextStyle(
-//               color: Color.fromARGB(255, 57, 241, 100),
-//               fontSize: 100.0,
-//               fontWeight: FontWeight.w700)),
-//       floatingActionButton: FloatingActionButton(
-//         onPressed: _logged,
-//         tooltip: 'Increment',
-//         child: const Icon(Icons.add),
-//       ),
-//  Image.network(
-//                 "https://assets.materialup.com/uploads/c18c728e-b55c-4195-9b50-16bb2d767908/mockup.png"),
-//           )

@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "795911225811",
-    "project_id": "ridebookingproject-ff01d",
-    "storage_bucket": "ridebookingproject-ff01d.appspot.com"
+    "project_number": "653871800503",
+    "project_id": "ride-booking-system-396310",
+    "storage_bucket": "ride-booking-system-396310.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:795911225811:android:d59c8368b53543d850af26",
+        "mobilesdk_app_id": "1:653871800503:android:71cc54cf839f5d33ff6d32",
         "android_client_info": {
           "package_name": "com.example.ride_booking_system"
         }
@@ -15,7 +15,26 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDy3nJtg4Ku1E9Lov7Pe9VtJ9S03vVp48Y"
+          "current_key": "AIzaSyDNjsZz8Xy7vWuZzaVuM9Uh7VbcWmbBuSw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:653871800503:android:50580392837f7a00ff6d32",
+        "android_client_info": {
+          "package_name": "com.example.ride_booking_system_driver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNjsZz8Xy7vWuZzaVuM9Uh7VbcWmbBuSw"
         }
       ],
       "services": {

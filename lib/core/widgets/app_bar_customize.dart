@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/constants/constants/dimension_constanst.dart';
-import 'package:ride_booking_system/core/style/text_style.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
+import 'package:ride_booking_system_driver/core/style/text_style.dart';
 
 class AppBarCustomize extends StatelessWidget implements PreferredSizeWidget {
   final String nameTitle;

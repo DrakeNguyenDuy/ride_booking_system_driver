@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/widgets/bottom_bar.dart';
-import 'package:ride_booking_system/presentations/history.dart';
-import 'package:ride_booking_system/presentations/home_screen.dart';
-import 'package:ride_booking_system/presentations/personal.dart';
-import 'package:ride_booking_system/presentations/wallet.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ride_booking_system_driver/core/widgets/bottom_bar.dart';
+import 'package:ride_booking_system_driver/presentations/history.dart';
+import 'package:ride_booking_system_driver/presentations/home_screen.dart';
+import 'package:ride_booking_system_driver/presentations/personal.dart';
+import 'package:ride_booking_system_driver/presentations/wallet.dart';
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
@@ -17,7 +16,7 @@ class _MainAppState extends State<MainApp> {
   @override
   void initState() {
     super.initState();
-    redirectToIntro();
+    // redirectToIntro();
   }
 
   int _currentIndex = 0;
@@ -29,10 +28,10 @@ class _MainAppState extends State<MainApp> {
     });
   }
 
-  void redirectToIntro() async {
-    final SharedPreferences sp = await SharedPreferences.getInstance();
-    sp.clear();
-  }
+  // void redirectToIntro() async {
+  //   final SharedPreferences sp = await SharedPreferences.getInstance();
+  //   sp.clear();
+  // }
 
   final listScreen = [
     const HomeScreen(),

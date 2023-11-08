@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/assets_images.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/style/text_style.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/assets_images.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/style/text_style.dart';
 
 class Category extends StatelessWidget {
   final String pathImage;

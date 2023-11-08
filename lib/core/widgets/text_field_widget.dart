@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/constants/constants/dimension_constanst.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
 
 //đang viết chức năng check kiểm tra đầu vào của giá trị còn đang lở dở
 // ignore: must_be_immutable
@@ -8,13 +8,15 @@ class TextFieldWidget extends StatelessWidget {
   final String nameLable;
   final bool typePassword;
   final IconData? iconData;
+  final String initValue;
   final TextEditingController? controller;
   const TextFieldWidget(
       {super.key,
       required this.nameLable,
       this.typePassword = false,
       this.controller,
-      this.iconData});
+      this.iconData,
+      this.initValue = ""});
 
   @override
   Widget build(BuildContext context) {
