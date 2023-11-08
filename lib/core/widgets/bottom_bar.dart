@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/init/main_screen_init.dart';
-import 'package:ride_booking_system/core/widgets/bottom_nav_bar_item.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/init/main_screen_init.dart';
+import 'package:ride_booking_system_driver/core/widgets/bottom_nav_bar_item.dart';
 
 class BottomBar extends StatefulWidget {
   final int indexCurrentParameter;

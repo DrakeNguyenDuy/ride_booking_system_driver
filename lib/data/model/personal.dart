@@ -25,4 +25,37 @@ class PersonalInfor {
       this.enable,
       this.roleId,
       this.roleName);
+
+  Map<String, dynamic> toJson(PersonalInfor personalInfor) {
+    return {
+      "id": personalInfor.id,
+      "name": personalInfor.name,
+      "gender": personalInfor.gender,
+      "phoneNumber": personalInfor.phoneNumber,
+      "mail": personalInfor.mail,
+      "address": personalInfor.address,
+      "citizenId": personalInfor.citizenId,
+      "avatar": personalInfor.avatar,
+      "userName": personalInfor.userName,
+      "enable": personalInfor.enable,
+      "roldId": personalInfor.roleId,
+      "roleName": personalInfor.roleName
+    };
+  }
+
+  factory PersonalInfor.fromJson(Map<String, dynamic> json) {
+    return PersonalInfor(
+        json["id"],
+        json["name"],
+        json["gender"],
+        json["phoneNumber"],
+        json["mail"],
+        json["address"],
+        json["citizenId"],
+        json["avatar"],
+        json["userName"],
+        json["enable"],
+        json["roleId"],
+        json["roleName"]);
+  }
 }

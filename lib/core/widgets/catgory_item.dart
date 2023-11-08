@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
-import 'package:ride_booking_system/core/style/text_style.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/style/text_style.dart';
 
 class CategoryItem extends StatelessWidget {
   final String pathFile;

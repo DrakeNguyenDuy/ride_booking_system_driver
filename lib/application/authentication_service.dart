@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ride_booking_system/application/common.config.dart';
-import 'package:ride_booking_system/core/constants/url_system.dart';
+import 'package:ride_booking_system_driver/application/common.config.dart';
+import 'package:ride_booking_system_driver/core/constants/url_system.dart';
 
 class AuthenticationService {
   Future<http.Response> login(String username, String pasword) async {

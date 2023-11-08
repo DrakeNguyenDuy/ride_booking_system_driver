@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system/application/authentication_service.dart';
-import 'package:ride_booking_system/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/application/authentication_service.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
