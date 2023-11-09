@@ -20,4 +20,20 @@ class PersonService {
     final body = jsonEncode({"userId": driverId});
     return await http.post(uri, headers: header, body: body);
   }
+
+  Future<http.Response> editPersonal(String name, String gender,
+      String phoneNumber, String address, int userId) async {
+    var uri = Uri.http(CommonConfig.ipAddress, UrlSystem.updatePersonal);
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    final body = jsonEncode({
+      "address": address,
+      "gender": gender,
+      "name": name,
+      "userId": userId,
+      "phoneNumber": phoneNumber,
+      "userModel": {"userId": userId}
+    });
+    return await http.post(uri, headers: header, body: body);
+  }
 }

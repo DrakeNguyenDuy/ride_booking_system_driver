@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_booking_system_driver/application/authentication_service.dart';
@@ -14,8 +15,8 @@ import 'package:ride_booking_system_driver/core/style/text_style.dart';
 import 'package:ride_booking_system_driver/presentations/edit_personal.dart';
 import 'package:ride_booking_system_driver/presentations/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:socket_io_client/socket_io_client.dart';
 import 'package:web_socket_channel/io.dart';
+
 // import 'package:image_picker/image_picker.dart';
 
 class PersonalScreen extends StatefulWidget {
@@ -83,6 +84,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                 phoneNumber: phoneNumber,
                 gender: gender,
                 email: email,
+                userId: idUser,
               )),
     );
   }
@@ -142,6 +144,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
         email = ins.getString(Varibales.EMAIL)!;
         idUser = ins.getInt(Varibales.DRIVER_ID)!;
         tokenFirebase = ins.getString(Varibales.TOKEN_FIREBASE)!;
+        print(tokenFirebase);
         bool isConnect = ins.getBool(Varibales.IS_CONNECT)!;
         if (isConnect) {
           _onOff.clear();
@@ -192,40 +195,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
     changeStateConnect(false);
   }
 
-  // void connectSocket() async {
-  //   print("conecting...");
-  //   this.channel = await WebSocket.connect(
-  //       'ws://ridebookingsystem.ddns.net:9090/socketHandler');
-  //   print("socket connection initializied");
-  //   channel.add('Hello, WebSocket server!');
-  //   // Listen for incoming messages
-  //   channel.listen((message) {
-  //     print('Received: $message');
-  //   }, onError: (error) {
-  //     print('Error: $error');
-  //   }, onDone: () {
-  //     print('WebSocket closed');
-  //   });
-  // }
-
-  // void connectSocket() {
-  //   final channel = IOWebSocketChannel.connect(
-  //     Uri.parse('ws://ridebookingsystem.ddns.net:9090/socketHandler'),
-  //   );
-
-  //   channel.sink.add({
-  //     "userId": 9,
-  //     "latitude": 10.763932849773887,
-  //     "longitude": 106.6817367439953,
-  //     "token":
-  //         "ds607-SkSPObVhAmBldEqS:APA91bFucNLQuNDuTP3jT9aDNT2BtbCdWE75CfN4sMuZj--x9lVP1ww9dk3aegSJsDZmeQT8htdvfYrBoL-lbWpRPIOlIcykadcZGDfQaIO2n2EC2B4rMOjXsC0lay91s7GwIfHHa1RM",
-  //     "timestamp": 3123123123
-  //   });
-  //   channel.stream.listen((message) {
-  //     print('Received: $message');
-  //   });
-  // }
-
   Future streamBase() async {
     int timeStamp = DateTime.now().millisecondsSinceEpoch;
     channel = IOWebSocketChannel.connect(
@@ -233,27 +202,10 @@ class _PersonalScreenState extends State<PersonalScreen> {
     );
     channel.sink.add(
         '{"userId": $idUser, "latitude": 10.763932849773887, "longitude": 106.6817367439953, "token": "$tokenFirebase", "timestamp":$timeStamp}');
-    print(channel);
     channel.stream.listen((message) {
       print('Received: $message');
     });
     Future.delayed(const Duration(seconds: 5));
-  }
-
-  // a() async {
-  //   try {
-  //     return await WebSocket.connect(
-  //         'ws://ridebookingsystem.ddns.net:9090/socketHandler');
-  //   } catch (e) {
-  //     print("Error! can not connect WS connectWs " + e.toString());
-  //     await Future.delayed(Duration(milliseconds: 10000));
-  //     return await a();
-  //   }
-  // }
-
-  void close() {
-    // channel.close(1, "d");
-    // channel.
   }
 
   @override
@@ -272,82 +224,73 @@ class _PersonalScreenState extends State<PersonalScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(getSayHi(),
-                                style: TextStyleApp.ts_1.copyWith(
-                                  color: ColorPalette.primaryColor,
-                                  letterSpacing: 1,
-                                )),
-                            Text(name,
-                                style: TextStyleApp.tsHeader.copyWith(
-                                    fontSize: fs_6,
-                                    inherit: true,
-                                    textBaseline: TextBaseline.ideographic,
-                                    overflow: TextOverflow.fade)),
-                            // Text(phoneNumber,
-                            //     style: TextStyleApp.ts_1.copyWith(
-                            //       color: ColorPalette.primaryColor,
-                            //       letterSpacing: 1,
-                            //     )),
-                            // Text(gender == "FEMALE" ? "Nữ" : "Nam",
-                            //     style: TextStyleApp.tsHeader.copyWith(
-                            //         fontSize: fs_6,
-                            //         inherit: true,
-                            //         textBaseline: TextBaseline.ideographic,
-                            //         overflow: TextOverflow.fade)),
-                          ],
+                        Expanded(
+                          flex: 3,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(getSayHi(),
+                                  style: TextStyleApp.ts_1.copyWith(
+                                    color: ColorPalette.primaryColor,
+                                    letterSpacing: 1,
+                                  )),
+                              Text(name,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyleApp.tsHeader.copyWith(
+                                      fontSize: fs_6,
+                                      inherit: true,
+                                      textBaseline: TextBaseline.ideographic,
+                                      overflow: TextOverflow.fade)),
+                            ],
+                          ),
                         ),
-                        // CircleAvatar(
-                        //   radius: MediaQuery.of(context).size.height / 20,
-                        //   backgroundColor: Colors.teal,
-                        //   backgroundImage: getAvt(),
-                        // )
-                        Stack(
-                          children: [
-                            CircleAvatar(
-                              radius: MediaQuery.of(context).size.height / 18,
-                              backgroundColor: Colors.teal,
-                              backgroundImage: getAvt(),
-                            ),
-                            Positioned(
-                              bottom: 1,
-                              right: 1,
-                              child: GestureDetector(
-                                onTap: () {
-                                  print("ok");
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 2,
-                                        color: Colors.white,
-                                      ),
-                                      borderRadius: const BorderRadius.all(
-                                        Radius.circular(
-                                          50,
+                        Expanded(
+                          flex: 1,
+                          child: Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: MediaQuery.of(context).size.height / 18,
+                                backgroundColor: Colors.teal,
+                                backgroundImage: getAvt(),
+                              ),
+                              Positioned(
+                                bottom: 1,
+                                right: 1,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    print("ok");
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 2,
+                                          color: Colors.white,
                                         ),
-                                      ),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          offset: Offset(2, 4),
-                                          color: Colors.black.withOpacity(
-                                            0.3,
+                                        borderRadius: const BorderRadius.all(
+                                          Radius.circular(
+                                            50,
                                           ),
-                                          blurRadius: 3,
                                         ),
-                                      ]),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(ds_1),
-                                    child: Icon(Icons.add_a_photo,
-                                        color: Colors.black),
+                                        color: Colors.white,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            offset: Offset(2, 4),
+                                            color: Colors.black.withOpacity(
+                                              0.3,
+                                            ),
+                                            blurRadius: 3,
+                                          ),
+                                        ]),
+                                    child: const Padding(
+                                      padding: EdgeInsets.all(ds_1),
+                                      child: Icon(Icons.add_a_photo,
+                                          color: Colors.black),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         )
                       ],
                     ),
@@ -390,7 +333,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
                     ListTile(
                         title: const Text("Đăng xuất"),
                         onTap: () => _pressItem(context)),
-                    ListTile(title: const Text("Đóng"), onTap: () => close()),
                   ],
                 ),
               )

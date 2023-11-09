@@ -1,13 +1,9 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
-import 'package:ride_booking_system_driver/core/constants/variables.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   // static String routeName = "/home";
@@ -18,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late final FirebaseMessaging _messaging;
+  // late final FirebaseMessaging _messaging;
   final double zoom = 18.0;
   double price = 0;
   late GoogleMapController mapController;
@@ -42,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    registerNotification();
+    // registerNotification();
   }
 
   //move camera to new position by position search
@@ -101,13 +97,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void registerNotification() async {
-    await Firebase.initializeApp();
-    // 2. Instantiate Firebase Messaging
-    _messaging = FirebaseMessaging.instance;
-    _messaging.getToken().then((value) async {
-      await SharedPreferences.getInstance().then((ins) {
-        ins.setString(Varibales.TOKEN_FIREBASE, value!);
-      });
-    });
+    // await Firebase.initializeApp();
+    // // 2. Instantiate Firebase Messaging
+    // _messaging = FirebaseMessaging.instance;
+    // _messaging.getToken().then((value) async {
+    //   await SharedPreferences.getInstance().then((ins) {
+    //     ins.setString(Varibales.TOKEN_FIREBASE, value!);
+    //   });
+    // });
+    // // FirebaseMessaging.onMessage.listen((RemoteMessage remoteMessage) async {
+    // //   print(remoteMessage.data);
+    // // });
   }
 }
