@@ -5,7 +5,7 @@ class AssetImages {
   static const _watermaskPath = "assets/images/watermask/";
 
   //specific images
-  static String logo = _logoPath + ("logo.jpg");
+  static String logo = _logoPath + ("logo.png");
   static String intro_1 = _imagePath + ("intro-1.jpg");
   static String intro_2 = _imagePath + ("intro-2.png");
   static String intro_3 = _imagePath + ("intro-3.png");
