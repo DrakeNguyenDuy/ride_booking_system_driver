@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
+import 'package:ride_booking_system_driver/application/message_service.dart';
+import 'package:ride_booking_system_driver/application/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   // static String routeName = "/home";
@@ -23,6 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Map<PolylineId, Polyline> polylinesMap = {};
 
+  final _messagingService = MessageService();
+
   LatLng fixLocationDriver =
       const LatLng(10.763932849773887, 106.6817367439953);
   LatLng l2 = LatLng(10.878, 106.757);
@@ -38,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // registerNotification();
+    // _messagingService.init(context);
   }
 
   //move camera to new position by position search
@@ -94,19 +101,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
-  }
-
-  void registerNotification() async {
-    // await Firebase.initializeApp();
-    // // 2. Instantiate Firebase Messaging
-    // _messaging = FirebaseMessaging.instance;
-    // _messaging.getToken().then((value) async {
-    //   await SharedPreferences.getInstance().then((ins) {
-    //     ins.setString(Varibales.TOKEN_FIREBASE, value!);
-    //   });
-    // });
-    // // FirebaseMessaging.onMessage.listen((RemoteMessage remoteMessage) async {
-    // //   print(remoteMessage.data);
-    // // });
   }
 }

@@ -4,7 +4,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/color_consta
 
 class AccecptRideScreen extends StatefulWidget {
   const AccecptRideScreen({super.key});
-  static const String routeName = "/history";
+  static const String routeName = "/accecpt-ride";
 
   @override
   State<AccecptRideScreen> createState() => _AccecptRideScreenState();

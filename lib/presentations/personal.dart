@@ -6,6 +6,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_booking_system_driver/application/authentication_service.dart';
+import 'package:ride_booking_system_driver/application/message_service.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
@@ -29,6 +30,7 @@ class PersonalScreen extends StatefulWidget {
 
 class _PersonalScreenState extends State<PersonalScreen> {
   final PersonService personalService = PersonService();
+  final _messagingService = MessageService();
   String name = "";
   String gender = "";
   String address = "";
@@ -51,6 +53,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
     innitData();
     super.initState();
     // getData();
+    _messagingService.init(context);
 
     connect();
   }

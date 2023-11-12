@@ -6,19 +6,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_callkit_incoming/entities/android_params.dart';
 import 'package:flutter_callkit_incoming/entities/call_event.dart';
 import 'package:flutter_callkit_incoming/entities/call_kit_params.dart';
+import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get_it/get_it.dart';
+import 'package:ride_booking_system_driver/application/locator.dart';
+import 'package:ride_booking_system_driver/application/navaigator_service.dart';
 import 'package:ride_booking_system_driver/application/notification_service.dart';
-import 'package:ride_booking_system_driver/core/constants/constants/assets_images.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
 import 'package:ride_booking_system_driver/presentations/flash_screen.dart';
 import 'package:ride_booking_system_driver/routes.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_callkit_incoming/flutter_callkit_incoming.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 final _messageStreamController = BehaviorSubject<RemoteMessage>();
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -26,42 +27,48 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   if (message.notification != null) {
     final body = jsonDecode(message.notification!.body as String);
     NotificationService notificationService = NotificationService();
-    notificationService.initializePlatformNotifications();
-    notificationService.showLocalNotification(
-        id: 1, title: "dsdsadas", body: "đasad", payload: "sdsdas");
+    // notificationService.initializePlatformNotifications(context);
+    String? title = message.notification!.title;
+    // print(message.notification!.body);
+    String bodyData =
+        'Mã chuyến đi: ${body["Mã chuyến đi"]} \nĐiểm đón: ${body["Điêm đón khách"]}\nĐiểm đến: ${body["Điêm trả khách"]}\nGía: ${body["Giá cuốc xe"]}';
+    // notificationService.showLocalNotification(
+    //     id: 1, title: title!, body: bodyData, payload: bodyData);
 
-    // CallKitParams callKitParams = CallKitParams(
-    //   id: body["Mã chuyến đi"],
-    //   nameCaller: "${message.notification!.title}",
-    //   appName: "RBS Driver",
-    //   duration: 30000,
-    //   // avatar: AssetImages.logo,
-    //   extra: <String, dynamic>{'userId': '1a2b3c4d'},
-    //   headers: <String, dynamic>{'name': 'Abc@123!', 'des': 'flutter'},
-    //   handle: 'Mã chuyến đi: ${body["Mã chuyến đi"]}',
-    //   android: const AndroidParams(
-    //       isCustomNotification: true,
-    //       isShowLogo: true,
-    //       ringtonePath: 'system_ringtone_default',
-    //       backgroundColor: '#0955fa',
-    //       backgroundUrl: 'https://i.pravatar.cc/500',
-    //       actionColor: '#4CAF50',
-    //       incomingCallNotificationChannelName: "Incoming Call",
-    //       missedCallNotificationChannelName: "Missed Call"),
-    //   textAccept: 'Nhận chuyến',
-    //   textDecline: 'Từ chối',
-    // );
-    // await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
-    // await FlutterCallkitIncoming.onEvent.listen((event) {
-    //   listenerEvent(event!);
-    // });
+    CallKitParams callKitParams = CallKitParams(
+      id: '${body["Điêm đón khách"]}\n${body["Điêm trả khách"]}',
+      nameCaller: 'Mã chiến đi ${body["Mã chiến đi"]}',
+      appName: "RBS Driver",
+      duration: 30000,
+      // avatar: AssetImages.logo,
+      handle: 'Mã chuyến đi: ${body["Mã chuyến đi"]}',
+      headers: <String, dynamic>{'apiKey': 'Abc@123!', 'platform': 'flutter'},
+      android: const AndroidParams(
+        // isShowLogo: true,
+
+        ringtonePath: 'system_ringtone_default',
+        backgroundColor: '#0955fa',
+        backgroundUrl: 'https://i.pravatar.cc/500',
+        actionColor: 'red',
+        // incomingCallNotificationChannelName: "Incoming Call",
+        // missedCallNotificationChannelName: "Missed Call"
+      ),
+      textAccept: 'Nhận chuyến',
+      textDecline: 'Từ chối',
+    );
+    await FlutterCallkitIncoming.showCallkitIncoming(callKitParams);
+    await FlutterCallkitIncoming.onEvent.listen((event) {
+      listenerEvent(event!);
+    });
   }
 }
 
 late FirebaseMessaging messaging;
+final GlobalKey<NavigatorState> globalKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Required by FlutterConfig
+  runApp(const MyApp());
   // await FlutterConfig.loadEnvVariables();
   await Firebase.initializeApp();
   messaging = FirebaseMessaging.instance;
@@ -79,60 +86,58 @@ void main() async {
     badge: true,
     sound: true,
   );
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    print('Handling a foreground message: ${message.messageId}');
-    print('Message data: ${message.data}');
-    print('Message notification: ${message.notification?.title}');
-    print('Message notification: ${message.notification?.body}');
+  // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+  //   print('Handling a foreground message: ${message.messageId}');
+  //   print('Message data: ${message.data}');
+  //   print('Message notification: ${message.notification?.title}');
+  //   print('Message notification: ${message.notification?.body}');
 
-    _messageStreamController.sink.add(message);
-  });
+  //   _messageStreamController.sink.add(message);
+  // });
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+  //   Navigator.pushNamed(navigatorKey.currentContext!, '/accecpt-ride');
+  // });
+  // FirebaseMessaging.onMessage.listen(_firebaseMessagingRedirect);
   registerNotification();
-  runApp(const MyApp());
 }
 
 Future<void> listenerEvent(CallEvent event) async {
+  globalKey.currentState?.pushNamed("/login");
   try {
     FlutterCallkitIncoming.onEvent.listen((event) async {
-      print('HOME: $event');
       switch (event!.event) {
         case Event.actionCallIncoming:
-          // TODO: received an incoming call
           break;
         case Event.actionCallStart:
-          // TODO: started an outgoing call
-          // TODO: show screen calling in Flutter
           break;
         case Event.actionCallAccept:
+          Future.delayed(const Duration(milliseconds: 5000), () {
+            globalKey.currentState?.pushNamed("/login");
+          });
+          // globalKey.currentState!.pushNamed("/login");
           print("Chấp nhận cuộc gọi");
+          event.body;
           break;
         case Event.actionCallDecline:
           print("Từ chối cuộc gọi");
           break;
         case Event.actionCallEnded:
-          // TODO: ended an incoming/outgoing call
           break;
         case Event.actionCallTimeout:
-          // TODO: missed an incoming call
           break;
         case Event.actionCallCallback:
-          // TODO: only Android - click action `Call back` from missed call notification
           break;
         case Event.actionCallToggleHold:
-          // TODO: only iOS
           break;
         case Event.actionCallToggleMute:
-          // TODO: only iOS
           break;
         case Event.actionCallToggleDmtf:
-          // TODO: only iOS
           break;
         case Event.actionCallToggleGroup:
           // TODO: only iOS
           break;
         case Event.actionCallToggleAudioSession:
-          // TODO: only iOS
           break;
         case Event.actionDidUpdateDevicePushTokenVoip:
           // TODO: only iOS
@@ -164,6 +169,12 @@ class MyApp extends StatelessWidget {
 
   @override
   MaterialApp build(BuildContext context) {
+    // FirebaseMessaging.onBackgroundMessage(
+    //     (message) => _firebaseMessagingBackgroundHandler(message, context));
+    // FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    //   Navigator.pushNamed(navigatorKey.currentContext!, '/accecpt-ride');
+    // });
+    // FirebaseMessaging.onMessage.listen(_firebaseMessagingRedirect);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       initialRoute: "/",
@@ -172,6 +183,7 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate
       ],
+      navigatorKey: globalKey,
       supportedLocales: const [Locale("en"), Locale("vi")],
       theme: ThemeData(
         primarySwatch: Colors.blue,

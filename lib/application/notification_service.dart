@@ -3,11 +3,16 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
   final _localNotifications = FlutterLocalNotificationsPlugin();
+  final GlobalKey<NavigatorState> navigatorKey =
+      new GlobalKey<NavigatorState>();
+  // late BuildContext context;
 
-  Future<void> initializePlatformNotifications() async {
+  // NotificationService(BuildContext x) {
+  //   this.context = x;
+  // }
+  Future<void> initializePlatformNotifications(BuildContext context) async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-
     final InitializationSettings initializationSettings =
         InitializationSettings(
       android: initializationSettingsAndroid,
@@ -15,6 +20,8 @@ class NotificationService {
 
     await _localNotifications.initialize(
       initializationSettings,
+      onDidReceiveNotificationResponse: (details) =>
+          {Navigator.pushNamed(context, "/accecpt-ride")},
     );
   }
 
@@ -29,11 +36,8 @@ class NotificationService {
       priority: Priority.max,
       playSound: true,
       ticker: 'ticker',
-      largeIcon: const DrawableResourceAndroidBitmap('justwater'),
-      // styleInformation: BigPictureStyleInformation(
-      //   FilePathAndroidBitmap(bigPicture),
-      //   hideExpandedLargeIcon: false,
-      // ),
+      fullScreenIntent: true,
+      subText: "con chim non",
       color: const Color(0xff2196f3),
     );
 
