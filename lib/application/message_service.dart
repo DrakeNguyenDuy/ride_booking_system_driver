@@ -1,8 +1,14 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:ride_booking_system_driver/application/notification_service.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ride_booking_system_driver/application/personal_service.dart';
+import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/style/main_style.dart';
+import 'package:ride_booking_system_driver/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageService {
   static String? fcmToken; // Variable to store the FCM token
@@ -10,6 +16,8 @@ class MessageService {
   static final MessageService _instance = MessageService._internal();
 
   factory MessageService() => _instance;
+
+  PersonService personService = PersonService();
 
   MessageService._internal();
 
@@ -34,42 +42,97 @@ class MessageService {
     fcmToken = await _fcm.getToken();
 
     // Handling background messages using the specified handler
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
+      print(message);
+    });
 
     // Listening for incoming messages while the app is in the foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint('Got a message whilst in the foreground!');
-      debugPrint('Message data: ${message.notification!.title.toString()}');
-
       if (message.notification != null) {
         if (message.notification!.title != null &&
             message.notification!.body != null) {
-          final notificationData = message.data;
-          final screen = notificationData['screen'];
-
-          // Showing an alert dialog when a notification is received (Foreground state)
+          Map<String, dynamic> notificationData =
+              jsonDecode(message.notification!.body!);
           showDialog(
-            context: context,
+            context: navigatorKey.currentContext!,
             barrierDismissible: false,
             builder: (BuildContext context) {
               return WillPopScope(
                 onWillPop: () async => false,
                 child: AlertDialog(
                   title: Text(message.notification!.title!),
-                  content: Text(message.notification!.body!),
-                  actions: [
-                    if (notificationData.containsKey('screen'))
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.of(context).pushNamed("/accecpt-ride");
-                        },
-                        child: const Text('Open Screen'),
+                  content: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      RichText(
+                        textDirection: TextDirection.ltr,
+                        textAlign: TextAlign.left,
+                        text: TextSpan(
+                          text: 'Mã chuyến đi: ',
+                          style: MainStyle.textStyle2.copyWith(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: notificationData["Mã chuyến đi"],
+                            ),
+                          ],
+                        ),
                       ),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Điểm đón: ',
+                          style: MainStyle.textStyle2.copyWith(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: notificationData["Điểm đón khách"],
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Điểm trả: ',
+                          style: MainStyle.textStyle2.copyWith(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: notificationData["Điểm trả khách"],
+                            ),
+                          ],
+                        ),
+                      ),
+                      RichText(
+                        text: TextSpan(
+                          text: 'Gía: ',
+                          style: MainStyle.textStyle2.copyWith(
+                              fontWeight: FontWeight.bold, fontSize: 16),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: notificationData["Giá cuốc xe"],
+                            ),
+                            const TextSpan(
+                              text: " VNĐ",
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  actions: [
                     TextButton(
-                      onPressed: () =>
-                          Navigator.of(context).pushNamed("/accecpt-ride"),
-                      child: const Text('Dismiss'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text("Từ chối"),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        accecpRide(int.parse(notificationData["Mã chuyến đi"]),
+                            context);
+                      },
+                      child: const Text('Chấp nhận'),
                     ),
                   ],
                 ),
@@ -85,7 +148,7 @@ class MessageService {
     // It gets the data to which screen to open
     FirebaseMessaging.instance.getInitialMessage().then((message) {
       if (message != null) {
-        _handleNotificationClick(context, message);
+        // _handleNotificationClick(context, message);
       }
     });
 
@@ -93,7 +156,7 @@ class MessageService {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint(
           'onMessageOpenedApp: ${message.notification!.title.toString()}');
-      _handleNotificationClick(context, message);
+      // _handleNotificationClick(context, message);
     });
   }
 
@@ -106,12 +169,122 @@ class MessageService {
       Navigator.of(context).pushNamed(screen);
     }
   }
-}
 
-// Handler for background messages
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `initializeApp` before using other Firebase services.
-  debugPrint('Handling a background message: ${message.notification!.title}');
+  void accecpRide(int tripId, BuildContext context) async {
+    Navigator.of(context).pop();
+    await SharedPreferences.getInstance().then((ins) {
+      int idUser = ins.getInt(Varibales.DRIVER_ID)!;
+      String tokenFirebase = ins.getString(Varibales.TOKEN_FIREBASE)!;
+      personService
+          .accecptRide(idUser, tokenFirebase, tripId)
+          .then((res) async {
+        if (res.statusCode == HttpStatus.ok) {
+          Fluttertoast.showToast(
+              msg: "Đã chấp nhận chuyến đi", webPosition: "top");
+        } else {
+          Fluttertoast.showToast(
+              msg: "Xảy ra lỗi khi chấp nhận cuốc", webPosition: "top");
+        }
+      });
+    });
+  }
+
+  // // Handler for background messages
+  // @pragma('vm:entry-point')
+  // Future<void> _firebaseMessagingBackgroundHandler(
+  //     RemoteMessage message) async {
+  //   if (message.notification != null) {
+  //     if (message.notification!.title != null &&
+  //         message.notification!.body != null) {
+  //       Map<String, dynamic> notificationData =
+  //           jsonDecode(message.notification!.body!);
+  //       showDialog(
+  //         context: navigatorKey.currentContext!,
+  //         barrierDismissible: false,
+  //         builder: (BuildContext context) {
+  //           return WillPopScope(
+  //             onWillPop: () async => false,
+  //             child: AlertDialog(
+  //               title: Text(message.notification!.title!),
+  //               content: Column(
+  //                 crossAxisAlignment: CrossAxisAlignment.stretch,
+  //                 mainAxisSize: MainAxisSize.min,
+  //                 children: [
+  //                   RichText(
+  //                     textDirection: TextDirection.ltr,
+  //                     textAlign: TextAlign.left,
+  //                     text: TextSpan(
+  //                       text: 'Mã chuyến đi: ',
+  //                       style: MainStyle.textStyle2.copyWith(
+  //                           fontWeight: FontWeight.bold, fontSize: 16),
+  //                       children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: notificationData["Mã chuyến đi"],
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   RichText(
+  //                     text: TextSpan(
+  //                       text: 'Điểm đón: ',
+  //                       style: MainStyle.textStyle2.copyWith(
+  //                           fontWeight: FontWeight.bold, fontSize: 16),
+  //                       children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: notificationData["Điểm đón khách"],
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   RichText(
+  //                     text: TextSpan(
+  //                       text: 'Điểm trả: ',
+  //                       style: MainStyle.textStyle2.copyWith(
+  //                           fontWeight: FontWeight.bold, fontSize: 16),
+  //                       children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: notificationData["Điểm trả khách"],
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                   RichText(
+  //                     text: TextSpan(
+  //                       text: 'Gía: ',
+  //                       style: MainStyle.textStyle2.copyWith(
+  //                           fontWeight: FontWeight.bold, fontSize: 16),
+  //                       children: <TextSpan>[
+  //                         TextSpan(
+  //                           text: notificationData["Giá cuốc xe"],
+  //                         ),
+  //                         const TextSpan(
+  //                           text: " VNĐ",
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ],
+  //               ),
+  //               actions: [
+  //                 TextButton(
+  //                   onPressed: () {
+  //                     Navigator.of(context).pop();
+  //                   },
+  //                   child: const Text("Từ chối"),
+  //                 ),
+  //                 TextButton(
+  //                   onPressed: () {
+  //                     accecpRide(
+  //                         int.parse(notificationData["Mã chuyến đi"]), context);
+  //                   },
+  //                   child: const Text('Chấp nhận'),
+  //                 ),
+  //               ],
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     }
+  //   }
+  // }
 }
