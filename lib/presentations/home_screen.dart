@@ -1,14 +1,11 @@
 import 'dart:async';
-import 'dart:convert';
 
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'package:ride_booking_system_driver/application/firebase_messaging_handler.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
 import 'package:ride_booking_system_driver/application/message_service.dart';
-import 'package:ride_booking_system_driver/application/notification_service.dart';
 
 class HomeScreen extends StatefulWidget {
   // static String routeName = "/home";
@@ -19,6 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _fcm = FirebaseMessagingHandler();
   // late final FirebaseMessaging _messaging;
   final double zoom = 18.0;
   double price = 0;
@@ -45,8 +43,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // _messagingService.init(context);
+    _messagingService.init(context);
+    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
+
+  // @pragma('vm:entry-point')
+  // Future<void> _firebaseMessagingBackgroundHandler(
+  //     RemoteMessage message) async {
+  //   // await Firebase.initializeApp();
+  //   print(message.notification!.body);
+  // }
 
   //move camera to new position by position search
   Future<void> cameraToPosition(LatLng newPosition) async {

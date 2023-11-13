@@ -36,4 +36,22 @@ class PersonService {
     });
     return await http.post(uri, headers: header, body: body);
   }
+
+  Future<http.Response> getHistory(int driverId) async {
+    var uri =
+        Uri.http(CommonConfig.ipAddress, "${UrlSystem.history}/$driverId");
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    return await http.get(uri, headers: header);
+  }
+
+  Future<http.Response> accecptRide(
+      int driverId, String token, int tripId) async {
+    var uri = Uri.http(CommonConfig.ipAddress, UrlSystem.accecpRide);
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    final body = jsonEncode(
+        {"driverId": driverId, "tokenDriver": token, "tripId": tripId});
+    return await http.post(uri, headers: header, body: body);
+  }
 }

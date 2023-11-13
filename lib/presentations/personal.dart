@@ -13,6 +13,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/dimension_co
 import 'package:ride_booking_system_driver/core/constants/constants/font_size_constanst.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
 import 'package:ride_booking_system_driver/core/style/text_style.dart';
+import 'package:ride_booking_system_driver/core/utils/function_utils.dart';
 import 'package:ride_booking_system_driver/presentations/edit_personal.dart';
 import 'package:ride_booking_system_driver/presentations/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,10 +53,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
   void initState() {
     innitData();
     super.initState();
-    // getData();
-    _messagingService.init(context);
-
-    connect();
+    FunctionUtils.connect(idUser);
   }
 
   void changeAvatar() {
@@ -168,22 +166,9 @@ class _PersonalScreenState extends State<PersonalScreen> {
     if (_onOff.lastIndexOf(true, 1) == 1) {
       disconnect();
     } else {
-      connect();
-      // connectSocket();
+      FunctionUtils.connect(idUser);
       streamBase();
     }
-  }
-
-  void connect() async {
-    personalService.connect(idUser).then((res) async {
-      if (res.statusCode == HttpStatus.ok) {
-        Fluttertoast.showToast(
-            msg: "Kết nối thành công", webPosition: "bottom");
-      } else {
-        Fluttertoast.showToast(msg: "Đã xảy ra lỗi", webPosition: "bottom");
-      }
-    });
-    changeStateConnect(true);
   }
 
   void disconnect() async {

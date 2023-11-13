@@ -8,4 +8,6 @@ class UrlSystem {
   static String connect = "${trip}/connect";
   static String disconnect = "${trip}/disconnect";
   static String updatePersonal = '$personal/update';
+  static String history = '$trip/driver';
+  static String accecpRide = '$trip/acceptRide';
 }
