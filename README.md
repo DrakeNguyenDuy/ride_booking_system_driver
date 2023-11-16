@@ -1,4 +1,4 @@
-# ride_booking_system_driver
+# RIDE BOOKING SYSTEM FOR DRIVER
 
 A project to build an app ride booking for driver
 
