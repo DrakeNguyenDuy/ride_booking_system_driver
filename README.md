@@ -1,16 +1,9 @@
 # ride_booking_system_driver
 
-A new Flutter project.
+A project to build an app ride booking for driver
 
 ## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Make sure that you have installed dart and Flutter on your computer.
+If you installed both, you just clone or download and run it like any other flutter project.
+## Some image demo
+![First demo](relative%20path/to/img.jpg?raw=true "Title")
