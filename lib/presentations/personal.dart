@@ -145,7 +145,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
         email = ins.getString(Varibales.EMAIL)!;
         idUser = ins.getInt(Varibales.DRIVER_ID)!;
         tokenFirebase = ins.getString(Varibales.TOKEN_FIREBASE)!;
-        print(tokenFirebase);
         bool isConnect = ins.getBool(Varibales.IS_CONNECT)!;
         if (isConnect) {
           _onOff.clear();

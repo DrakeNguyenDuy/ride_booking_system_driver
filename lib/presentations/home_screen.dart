@@ -30,7 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   LatLng fixLocationDriver =
       const LatLng(10.763932849773887, 106.6817367439953);
-  LatLng l2 = LatLng(10.878, 106.757);
+  LatLng l2 = LatLng(10.764032849773887, 106.6818367439953);
 
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
@@ -46,13 +46,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _messagingService.init(context);
     // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
-
-  // @pragma('vm:entry-point')
-  // Future<void> _firebaseMessagingBackgroundHandler(
-  //     RemoteMessage message) async {
-  //   // await Firebase.initializeApp();
-  //   print(message.notification!.body);
-  // }
 
   //move camera to new position by position search
   Future<void> cameraToPosition(LatLng newPosition) async {
@@ -76,6 +69,33 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Set<Marker> renderMarker() {
+    if (_messagingService.getLatitudeDes() != 0 &&
+        _messagingService.getLongtitudeDes() != 0) {
+      return {
+        Marker(
+          markerId: const MarkerId("location2"),
+          position: fixLocationDriver,
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+        Marker(
+          markerId: const MarkerId("location2"),
+          position: LatLng(_messagingService.getLatitudeDes(),
+              _messagingService.getLongtitudeDes()),
+          icon: BitmapDescriptor.defaultMarker,
+        )
+      };
+    } else {
+      return {
+        Marker(
+          markerId: const MarkerId("location2"),
+          position: fixLocationDriver,
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      };
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -91,18 +111,19 @@ class _HomeScreenState extends State<HomeScreen> {
             target: fixLocationDriver,
             zoom: zoom,
           ),
-          markers: {
-            Marker(
-              markerId: const MarkerId("location2"),
-              position: fixLocationDriver,
-              icon: BitmapDescriptor.defaultMarker,
-            ),
-            Marker(
-              markerId: const MarkerId("location1"),
-              position: l2,
-              icon: BitmapDescriptor.defaultMarkerWithHue(2),
-            ),
-          },
+          markers: renderMarker(),
+          // markers: {
+          //   Marker(
+          //     markerId: const MarkerId("location2"),
+          //     position: fixLocationDriver,
+          //     icon: BitmapDescriptor.defaultMarker,
+          //   ),
+          //   Marker(
+          //     markerId: const MarkerId("location2"),
+          //     position: l2,
+          //     icon: BitmapDescriptor.defaultMarker,
+          //   )
+          // },
           polylines: Set<Polyline>.of(polylinesMap.values),
         ),
       ),

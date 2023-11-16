@@ -3,15 +3,22 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/style/button_style.dart';
 import 'package:ride_booking_system_driver/core/style/main_style.dart';
+import 'package:ride_booking_system_driver/core/style/text_style.dart';
+import 'package:ride_booking_system_driver/core/utils/dialog_utils.dart';
 import 'package:ride_booking_system_driver/main.dart';
+import 'package:ride_booking_system_driver/presentations/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MessageService {
   static String? fcmToken; // Variable to store the FCM token
+
+  static double latitudeDes = 0;
+  static double longtitudeDes = 0;
 
   static final MessageService _instance = MessageService._internal();
 
@@ -39,12 +46,17 @@ class MessageService {
         'User granted notifications permission: ${settings.authorizationStatus}');
 
     // Retrieving the FCM token
-    fcmToken = await _fcm.getToken();
+    // fcmToken = await _fcm.getToken();
+    await _fcm.getToken().then((value) async {
+      await SharedPreferences.getInstance().then((ins) {
+        ins.setString(Varibales.TOKEN_FIREBASE, value!);
+      });
+    });
 
     // Handling background messages using the specified handler
-    FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
-      print(message);
-    });
+    // FirebaseMessaging.onBackgroundMessage((RemoteMessage message) async {
+    //   print(message);
+    // });
 
     // Listening for incoming messages while the app is in the foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -53,6 +65,8 @@ class MessageService {
             message.notification!.body != null) {
           Map<String, dynamic> notificationData =
               jsonDecode(message.notification!.body!);
+          latitudeDes = double.parse(notificationData["Vĩ độ điểm đến"]);
+          longtitudeDes = double.parse(notificationData["Kinh độ điểm đến"]);
           showDialog(
             context: navigatorKey.currentContext!,
             barrierDismissible: false,
@@ -71,11 +85,16 @@ class MessageService {
                         text: TextSpan(
                           text: 'Mã chuyến đi: ',
                           style: MainStyle.textStyle2.copyWith(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
                           children: <TextSpan>[
                             TextSpan(
-                              text: notificationData["Mã chuyến đi"],
-                            ),
+                                text: notificationData["Mã chuyến đi"],
+                                style: MainStyle.textStyle2.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                )),
                           ],
                         ),
                       ),
@@ -83,11 +102,16 @@ class MessageService {
                         text: TextSpan(
                           text: 'Điểm đón: ',
                           style: MainStyle.textStyle2.copyWith(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
                           children: <TextSpan>[
                             TextSpan(
-                              text: notificationData["Điểm đón khách"],
-                            ),
+                                text: notificationData["Điểm đón khách"],
+                                style: MainStyle.textStyle2.copyWith(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -95,10 +119,16 @@ class MessageService {
                         text: TextSpan(
                           text: 'Điểm trả: ',
                           style: MainStyle.textStyle2.copyWith(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
                           children: <TextSpan>[
                             TextSpan(
                               text: notificationData["Điểm trả khách"],
+                              style: MainStyle.textStyle2.copyWith(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.normal),
                             ),
                           ],
                         ),
@@ -107,14 +137,22 @@ class MessageService {
                         text: TextSpan(
                           text: 'Gía: ',
                           style: MainStyle.textStyle2.copyWith(
-                              fontWeight: FontWeight.bold, fontSize: 16),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.black),
                           children: <TextSpan>[
                             TextSpan(
-                              text: notificationData["Giá cuốc xe"],
-                            ),
-                            const TextSpan(
-                              text: " VNĐ",
-                            ),
+                                text: notificationData["Giá cuốc xe"],
+                                style: MainStyle.textStyle2.copyWith(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal)),
+                            TextSpan(
+                                text: " VNĐ",
+                                style: MainStyle.textStyle2.copyWith(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal)),
                           ],
                         ),
                       ),
@@ -122,19 +160,30 @@ class MessageService {
                   ),
                   actions: [
                     TextButton(
+                      style: ButtonStyleHandle.bts_1,
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: const Text("Từ chối"),
+                      child: Text(
+                        "Từ chối",
+                      ),
                     ),
                     TextButton(
+                      style: ButtonStyleHandle.bts_1,
                       onPressed: () {
                         accecpRide(int.parse(notificationData["Mã chuyến đi"]),
                             context);
                       },
-                      child: const Text('Chấp nhận'),
+                      child: Text(
+                        'Chấp nhận',
+                      ),
                     ),
                   ],
+                  icon: const Icon(Icons.directions_car_rounded,
+                      size: 50, color: ColorPalette.primaryColor),
+                  actionsAlignment: MainAxisAlignment.spaceAround,
+                  shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(25))),
                 ),
               );
             },
@@ -179,112 +228,16 @@ class MessageService {
           .accecptRide(idUser, tokenFirebase, tripId)
           .then((res) async {
         if (res.statusCode == HttpStatus.ok) {
-          Fluttertoast.showToast(
-              msg: "Đã chấp nhận chuyến đi", webPosition: "top");
+          // DialogUtils.showDialogNotfication(
+          //     context, "Chấp nhận cuốc thành công", Icons.done);
         } else {
-          Fluttertoast.showToast(
-              msg: "Xảy ra lỗi khi chấp nhận cuốc", webPosition: "top");
+          // DialogUtils.showDialogNotfication(
+          //     context, "Xảy ra lỗi khi nhận thành công", Icons.error_outline);
         }
       });
     });
   }
 
-  // // Handler for background messages
-  // @pragma('vm:entry-point')
-  // Future<void> _firebaseMessagingBackgroundHandler(
-  //     RemoteMessage message) async {
-  //   if (message.notification != null) {
-  //     if (message.notification!.title != null &&
-  //         message.notification!.body != null) {
-  //       Map<String, dynamic> notificationData =
-  //           jsonDecode(message.notification!.body!);
-  //       showDialog(
-  //         context: navigatorKey.currentContext!,
-  //         barrierDismissible: false,
-  //         builder: (BuildContext context) {
-  //           return WillPopScope(
-  //             onWillPop: () async => false,
-  //             child: AlertDialog(
-  //               title: Text(message.notification!.title!),
-  //               content: Column(
-  //                 crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                 mainAxisSize: MainAxisSize.min,
-  //                 children: [
-  //                   RichText(
-  //                     textDirection: TextDirection.ltr,
-  //                     textAlign: TextAlign.left,
-  //                     text: TextSpan(
-  //                       text: 'Mã chuyến đi: ',
-  //                       style: MainStyle.textStyle2.copyWith(
-  //                           fontWeight: FontWeight.bold, fontSize: 16),
-  //                       children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: notificationData["Mã chuyến đi"],
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   RichText(
-  //                     text: TextSpan(
-  //                       text: 'Điểm đón: ',
-  //                       style: MainStyle.textStyle2.copyWith(
-  //                           fontWeight: FontWeight.bold, fontSize: 16),
-  //                       children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: notificationData["Điểm đón khách"],
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   RichText(
-  //                     text: TextSpan(
-  //                       text: 'Điểm trả: ',
-  //                       style: MainStyle.textStyle2.copyWith(
-  //                           fontWeight: FontWeight.bold, fontSize: 16),
-  //                       children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: notificationData["Điểm trả khách"],
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                   RichText(
-  //                     text: TextSpan(
-  //                       text: 'Gía: ',
-  //                       style: MainStyle.textStyle2.copyWith(
-  //                           fontWeight: FontWeight.bold, fontSize: 16),
-  //                       children: <TextSpan>[
-  //                         TextSpan(
-  //                           text: notificationData["Giá cuốc xe"],
-  //                         ),
-  //                         const TextSpan(
-  //                           text: " VNĐ",
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ),
-  //                 ],
-  //               ),
-  //               actions: [
-  //                 TextButton(
-  //                   onPressed: () {
-  //                     Navigator.of(context).pop();
-  //                   },
-  //                   child: const Text("Từ chối"),
-  //                 ),
-  //                 TextButton(
-  //                   onPressed: () {
-  //                     accecpRide(
-  //                         int.parse(notificationData["Mã chuyến đi"]), context);
-  //                   },
-  //                   child: const Text('Chấp nhận'),
-  //                 ),
-  //               ],
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     }
-  //   }
-  // }
+  double getLatitudeDes() => latitudeDes;
+  double getLongtitudeDes() => longtitudeDes;
 }
