@@ -6,6 +6,7 @@ import 'package:ride_booking_system_driver/application/message_service.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/widgets/loading.dart';
 import 'package:ride_booking_system_driver/core/widgets/task_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -26,12 +27,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    getHistory();
     _messagingService.init(context);
-    innitData();
+    innitData().then((value) => getHistory());
   }
 
-  void innitData() async {
+  Future<void> innitData() async {
     await SharedPreferences.getInstance().then((ins) {
       setState(() {
         idUser = ins.getInt(Varibales.DRIVER_ID)!;
@@ -61,7 +61,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
             title: const Text("Lịch sử chuyến đi"),
             backgroundColor: ColorPalette.primaryColor),
         body: itemHistorys.isEmpty
-            ? null
+            ? const Center(
+                child: LoadingWidget(),
+              )
             : SafeArea(
                 child: ListView.builder(
                     itemCount: itemHistorys.length,
@@ -72,8 +74,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           to: itemHistorys[index]["destinationLocation"],
                           price: itemHistorys[index]["price"],
                           rating: itemHistorys[index]["rating"],
-                          customerName: itemHistorys[index]["customer"]["name"],
-                          phoneNumber: itemHistorys[index]["customer"]
+                          driverName: itemHistorys[index]["customer"]["name"],
+                          phoneNumber: itemHistorys[index]["driver"]
                               ["phoneNumber"],
                           gender: itemHistorys[index]["customer"]["gender"]);
                     })));

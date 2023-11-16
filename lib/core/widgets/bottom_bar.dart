@@ -34,9 +34,6 @@ class _BottomBarState extends State<BottomBar> {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      // borderRadius: const BorderRadius.only(
-      //     topLeft: Radius.circular(borderRadiusBigger),
-      //     topRight: Radius.circular(borderRadiusBigger)),
       child: Container(
         color: ColorPalette.primaryColor,
         height: MediaQuery.of(context).size.height / 12,

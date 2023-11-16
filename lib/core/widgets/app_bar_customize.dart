@@ -50,13 +50,6 @@ class AppBarCustomize extends StatelessWidget implements PreferredSizeWidget {
       ),
       backgroundColor: ColorPalette.white,
       shadowColor: ColorPalette.primaryColor.withOpacity(0.1),
-
-      // bottom: TabBar(
-      //   labelColor: ColorPalette.primaryColor,
-      //   labelStyle: TextStyle(color: ColorPalette.primaryColor),
-      //   controller: _tabController,
-      //   tabs: listTab,
-      // )
     );
   }
 

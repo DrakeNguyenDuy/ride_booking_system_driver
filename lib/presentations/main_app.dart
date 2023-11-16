@@ -3,7 +3,6 @@ import 'package:ride_booking_system_driver/core/widgets/bottom_bar.dart';
 import 'package:ride_booking_system_driver/presentations/history.dart';
 import 'package:ride_booking_system_driver/presentations/home_screen.dart';
 import 'package:ride_booking_system_driver/presentations/personal.dart';
-import 'package:ride_booking_system_driver/presentations/wallet.dart';
 
 class MainApp extends StatefulWidget {
   const MainApp({super.key});
@@ -28,7 +27,6 @@ class _MainAppState extends State<MainApp> {
   final listScreen = [
     const HomeScreen(),
     const HistoryScreen(),
-    const WalletScreen(),
     const PersonalScreen(),
   ];
 
