@@ -27,7 +27,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _messagingService.init(context);
+    _messagingService.init();
     innitData().then((value) => getHistory());
   }
 

@@ -10,4 +10,5 @@ class UrlSystem {
   static String updatePersonal = '$personal/update';
   static String history = '$trip/driver';
   static String accecpRide = '$trip/acceptRide';
+  static String cancelRide = "$trip/driverCancel";
 }

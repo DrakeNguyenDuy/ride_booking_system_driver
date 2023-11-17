@@ -33,6 +33,7 @@ class AssetImages {
   static String filterIc = _imageIcon + ("filter.png");
   static String newSearchIc = _imageIcon + ("new-search.png");
   static String avtDefaultIc = _imageIcon + ("avatar_default.png");
+  static String markerIc = _imageIcon + ("marker.png");
   //watermask
   static String starW = _watermaskPath + ("star.png");
   static String ovalW = _watermaskPath + ("oval.png");

@@ -2,11 +2,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ride_booking_system_driver/application/authentication_service.dart';
-import 'package:ride_booking_system_driver/application/message_service.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
@@ -31,7 +29,6 @@ class PersonalScreen extends StatefulWidget {
 
 class _PersonalScreenState extends State<PersonalScreen> {
   final PersonService personalService = PersonService();
-  final _messagingService = MessageService();
   String name = "";
   String gender = "";
   String address = "";
@@ -41,13 +38,8 @@ class _PersonalScreenState extends State<PersonalScreen> {
   String tokenFirebase = "";
   int idUser = -1;
   List<bool> _onOff = <bool>[true, false];
-  // XFile? xFile;
 
   AuthenticationService authenticationService = AuthenticationService();
-  // WebSocketChannel channel = IOWebSocketChannel.connect(
-  //     "ws://ridebookingsystem.ddns.net:9090/triphandler");
-
-  // late WebSocket channel;
   late IOWebSocketChannel channel;
   @override
   void initState() {
@@ -58,12 +50,6 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   void changeAvatar() {
     // ImagePicker imagePicker = ImagePicker();
-  }
-
-  void showAlert() {
-    // showDialog(context: context, builder: builder){
-    //   retun
-    // }
   }
 
   void _logout() async {
@@ -87,7 +73,13 @@ class _PersonalScreenState extends State<PersonalScreen> {
                 email: email,
                 userId: idUser,
               )),
-    );
+    ).then((value) async {
+      await SharedPreferences.getInstance().then((ins) {
+        setState(() {
+          name = ins.getString(Varibales.NAME_USER)!;
+        });
+      });
+    });
   }
 
   String getSayHi() {
