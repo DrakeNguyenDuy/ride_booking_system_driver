@@ -11,6 +11,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/color_consta
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
 import 'package:ride_booking_system_driver/core/style/button_style.dart';
 import 'package:ride_booking_system_driver/core/style/main_style.dart';
+import 'package:ride_booking_system_driver/core/utils/dialog_utils.dart';
 import 'package:ride_booking_system_driver/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -137,8 +138,8 @@ class MessageService {
             });
           });
         } else {
-          // DialogUtils.showDialogNotfication(
-          //     context, "Xảy ra lỗi khi nhận thành công", Icons.error_outline);
+          DialogUtils.showDialogNotfication(
+              context, "Xảy ra lỗi khi nhận thành công", Icons.error_outline);
         }
       });
     });
@@ -330,7 +331,8 @@ class MessageService {
               TextButton(
                 style: ButtonStyleHandle.bts_1,
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  reset();
+                  Navigator.of(context).pushNamed("/home");
                 },
                 child: Text(
                   "OK",

@@ -54,4 +54,15 @@ class PersonService {
         {"driverId": driverId, "tokenDriver": token, "tripId": tripId});
     return await http.post(uri, headers: header, body: body);
   }
+
+  Future<http.StreamedResponse> uploadImage(String path, int personId) async {
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    var request = http.MultipartRequest('POST',
+        Uri.parse('http://ridebookingsystem.ddns.net:9090/api/upload-images'));
+    request.fields.addAll({'userId': '10'});
+    request.files.add(await http.MultipartFile.fromPath('image', path));
+    request.headers.addAll(header);
+    return await request.send();
+  }
 }
