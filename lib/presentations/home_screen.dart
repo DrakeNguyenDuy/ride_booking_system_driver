@@ -1,11 +1,18 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-import 'package:ride_booking_system_driver/application/firebase_messaging_handler.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
+import 'package:ride_booking_system_driver/application/main_service.dart';
 import 'package:ride_booking_system_driver/application/message_service.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
+import 'package:ride_booking_system_driver/core/style/button_style.dart';
+import 'package:ride_booking_system_driver/core/style/main_style.dart';
+import 'package:ride_booking_system_driver/core/utils/dialog_utils.dart';
 
 class HomeScreen extends StatefulWidget {
   // static String routeName = "/home";
@@ -16,13 +23,14 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final _fcm = FirebaseMessagingHandler();
-  // late final FirebaseMessaging _messaging;
   final double zoom = 18.0;
   double price = 0;
   late GoogleMapController mapController;
   final Location _locationController = Location();
   GoogleService googleService = GoogleService();
+  var controller = TextEditingController();
+
+  MainService mainService = MainService();
 
   Map<PolylineId, Polyline> polylinesMap = {};
 
@@ -43,8 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _messagingService.init(context);
-    // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    _messagingService.init();
   }
 
   //move camera to new position by position search
@@ -69,6 +76,59 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void cancel() {
+    Widget okButton = TextButton(
+        style: ButtonStyleHandle.bts_1,
+        onPressed: () {
+          Navigator.of(context).pop();
+          cancelRide();
+        },
+        child: const Text(
+          "OK",
+          style: TextStyle(color: ColorPalette.white),
+        ));
+    Widget cancelButton = TextButton(
+      style: ButtonStyleHandle.bts_1,
+      onPressed: () {
+        Navigator.pop(context);
+      },
+      child: const Text(
+        "Hủy",
+        style: TextStyle(color: ColorPalette.white),
+      ),
+    );
+
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        barrierLabel: "đas",
+        useSafeArea: true,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: const Text("Bạn vẫn muốn hủy xe chứ"),
+            content: TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                hintText: "Nhập nội dung hủy chiến",
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(ds_3)),
+                  borderSide:
+                      BorderSide(width: ds_0, color: ColorPalette.primaryColor),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(ds_3)),
+                  borderSide:
+                      BorderSide(width: ds_0, color: ColorPalette.primaryColor),
+                ),
+              ),
+              maxLines: 8,
+            ),
+            actions: [cancelButton, okButton],
+            actionsAlignment: MainAxisAlignment.spaceEvenly,
+          );
+        });
+  }
+
   Set<Marker> renderMarker() {
     if (_messagingService.getLatitudeDes() != 0 &&
         _messagingService.getLongtitudeDes() != 0) {
@@ -82,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
           markerId: const MarkerId("location2"),
           position: LatLng(_messagingService.getLatitudeDes(),
               _messagingService.getLongtitudeDes()),
-          icon: BitmapDescriptor.defaultMarker,
+          icon: _messagingService.getMarker(),
         )
       };
     } else {
@@ -96,15 +156,106 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void cancelRide() async {
+    mainService
+        .cancelRide(int.parse(_messagingService.getTripId()), controller.text)
+        .then((res) async {
+      if (res.statusCode == HttpStatus.ok) {
+        Navigator.pop(context);
+        Fluttertoast.showToast(msg: "Hủy chuyến thành công");
+        _messagingService.reset();
+        setState(() {});
+      } else {
+        DialogUtils.showDialogNotfication(
+            context, "Xảy ra lỗi khi hủy chuyến", Icons.error);
+      }
+    });
+  }
+
+  void _showSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true, // set this to true
+      builder: (_) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, controller) {
+            return Container(
+                padding: EdgeInsets.all(ds_2),
+                decoration: BoxDecoration(
+                    color: ColorPalette.white,
+                    borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(ds_1),
+                        topRight: Radius.circular(ds_1))),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    renderText("Mã chuyến đi", _messagingService.getTripId()),
+                    renderText("Điểm đón", _messagingService.getPick()),
+                    renderText("Điểm trả", _messagingService.getDes()),
+                    renderText("Gía", _messagingService.getPrice()),
+                    Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 18,
+                        margin:
+                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorPalette.primaryColor,
+                          ),
+                          onPressed: cancel,
+                          child: Text(
+                            "Hủy Chuyến",
+                            style: MainStyle.textStyle5,
+                          ),
+                        )),
+                  ],
+                ));
+          },
+        );
+      },
+    );
+  }
+
+  Widget renderText(String nameLable, dynamic value) {
+    return RichText(
+      text: TextSpan(
+        text: "$nameLable: ",
+        style: MainStyle.textStyle2.copyWith(
+          fontSize: 20,
+          color: Colors.black,
+        ),
+        children: <TextSpan>[
+          TextSpan(
+              text: "$value",
+              style: MainStyle.textStyle2.copyWith(
+                  fontSize: 16,
+                  color: Colors.black,
+                  fontWeight: FontWeight.normal)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.green[700],
       ),
       home: Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        floatingActionButton: _messagingService.getLatitudeDes() == 0 &&
+                _messagingService.getLongtitudeDes() == 0
+            ? null
+            : FloatingActionButton(
+                backgroundColor: ColorPalette.primaryColor,
+                onPressed: _showSheet,
+                child: Icon(
+                  Icons.keyboard_double_arrow_up_outlined,
+                  color: ColorPalette.white,
+                )),
         body: GoogleMap(
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
@@ -112,18 +263,6 @@ class _HomeScreenState extends State<HomeScreen> {
             zoom: zoom,
           ),
           markers: renderMarker(),
-          // markers: {
-          //   Marker(
-          //     markerId: const MarkerId("location2"),
-          //     position: fixLocationDriver,
-          //     icon: BitmapDescriptor.defaultMarker,
-          //   ),
-          //   Marker(
-          //     markerId: const MarkerId("location2"),
-          //     position: l2,
-          //     icon: BitmapDescriptor.defaultMarker,
-          //   )
-          // },
           polylines: Set<Polyline>.of(polylinesMap.values),
         ),
       ),
