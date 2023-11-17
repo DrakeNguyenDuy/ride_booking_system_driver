@@ -16,6 +16,7 @@ import 'package:ride_booking_system_driver/presentations/edit_personal.dart';
 import 'package:ride_booking_system_driver/presentations/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:image_picker/image_picker.dart';
 
 // import 'package:image_picker/image_picker.dart';
 
@@ -45,11 +46,23 @@ class _PersonalScreenState extends State<PersonalScreen> {
   void initState() {
     innitData();
     super.initState();
-    FunctionUtils.connect(idUser);
   }
 
-  void changeAvatar() {
-    // ImagePicker imagePicker = ImagePicker();
+  void changeAvatar() async {
+    final ImagePicker picker = ImagePicker();
+    XFile? choosedimage = await picker.pickImage(source: ImageSource.gallery);
+    List<int> bytes = await choosedimage!.readAsBytes();
+    String base64 = base64Encode(bytes);
+    personalService.uploadImage(choosedimage!.path, idUser).then((res) async {
+      if (res.statusCode == HttpStatus.ok) {
+        Fluttertoast.showToast(msg: "Cập nhật ảnh thành công");
+        await SharedPreferences.getInstance()
+            .then((ins) => {ins.setString(Varibales.AVATAR_USER, base64)});
+        setState(() {
+          avatar = base64;
+        });
+      }
+    });
   }
 
   void _logout() async {
@@ -111,19 +124,13 @@ class _PersonalScreenState extends State<PersonalScreen> {
         context: context,
         builder: (BuildContext buildContext) {
           return AlertDialog(
-            title: const Text("Are you want logout"),
+            title: const Text("Bạn có muốn đăng xuất?"),
             actions: [
               cancelButton,
               continueButton,
             ],
           );
         });
-  }
-
-  void changeStateConnect(bool status) async {
-    await SharedPreferences.getInstance().then((ins) {
-      ins.setBool(Varibales.IS_CONNECT, status);
-    });
   }
 
   void innitData() async {
@@ -171,7 +178,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
         Fluttertoast.showToast(msg: "Đã xảy ra lỗi", webPosition: "bottom");
       }
     });
-    changeStateConnect(false);
+    FunctionUtils.changeStateConnect(false);
   }
 
   Future streamBase() async {
@@ -237,7 +244,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
                                 right: 1,
                                 child: GestureDetector(
                                   onTap: () {
-                                    print("ok");
+                                    changeAvatar();
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
