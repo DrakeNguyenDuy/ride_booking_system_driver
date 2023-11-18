@@ -138,8 +138,8 @@ class MessageService {
             });
           });
         } else {
-          DialogUtils.showDialogNotfication(
-              context, "Xảy ra lỗi khi nhận thành công", Icons.error_outline);
+          DialogUtils.showDialogNotfication(context, true,
+              "Xảy ra lỗi khi nhận chuyến đi", Icons.error_outline);
         }
       });
     });
@@ -250,7 +250,7 @@ class MessageService {
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text(
+                child: const Text(
                   "Từ chối",
                   style: TextStyle(color: ColorPalette.white),
                 ),
@@ -260,7 +260,7 @@ class MessageService {
                 onPressed: () {
                   accecpRide(int.parse(tripId), context);
                 },
-                child: Text('Chấp nhận',
+                child: const Text('Chấp nhận',
                     style: TextStyle(color: ColorPalette.white)),
               ),
             ],
@@ -334,7 +334,7 @@ class MessageService {
                   reset();
                   Navigator.of(context).pushNamed("/home");
                 },
-                child: Text(
+                child: const Text(
                   "OK",
                   style: TextStyle(color: ColorPalette.white),
                 ),

@@ -12,4 +12,30 @@ class MainService {
     final body = jsonEncode({"tripId": tripId, "reason": reason});
     return await http.post(uri, headers: header, body: body);
   }
+
+  Future<String> pickUpCustomer(String tripId) async {
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    var request = http.MultipartRequest(
+        'GET',
+        Uri.parse(
+            'http://ridebookingsystem.ddns.net:9090/trip/pickupCustomer'));
+    request.fields.addAll({'tripId': tripId});
+    request.headers.addAll(header);
+    final response = await request.send();
+    final respStr = await response.stream.bytesToString();
+    return respStr;
+  }
+
+  Future<String> conpleteTrip(String tripId) async {
+    Map<String, String> header =
+        await CommonConfig.headerWithToken().then((value) => value);
+    var request = http.MultipartRequest('GET',
+        Uri.parse('http://ridebookingsystem.ddns.net:9090/trip/completeRide'));
+    request.fields.addAll({'tripId': tripId});
+    request.headers.addAll(header);
+    final response = await request.send();
+    final respStr = await response.stream.bytesToString();
+    return respStr;
+  }
 }
