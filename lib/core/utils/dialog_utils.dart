@@ -3,7 +3,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/color_consta
 
 class DialogUtils {
   static void showDialogNotfication(
-      BuildContext context, String message, IconData icon) {
+      BuildContext context, bool isError, String message, IconData icon) {
     Widget okButton = TextButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateColor.resolveWith(
@@ -21,7 +21,8 @@ class DialogUtils {
         context: context,
         builder: (BuildContext buildContext) {
           return AlertDialog(
-            title: const Text("Chúc Mừng", style: TextStyle(fontSize: 25)),
+            title: Text(isError ? "Lỗi" : "Chúc mừng",
+                style: const TextStyle(fontSize: 25)),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
@@ -37,7 +38,9 @@ class DialogUtils {
             ),
             actions: [okButton],
             actionsAlignment: MainAxisAlignment.spaceAround,
-            icon: Icon(icon, size: 50, color: ColorPalette.green),
+            icon: Icon(icon,
+                size: 50,
+                color: isError ? ColorPalette.red : ColorPalette.green),
             shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(25))),
           );

@@ -1,10 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
 import 'package:ride_booking_system_driver/application/main_service.dart';
 import 'package:ride_booking_system_driver/application/message_service.dart';
@@ -26,7 +26,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final double zoom = 18.0;
   double price = 0;
   late GoogleMapController mapController;
-  final Location _locationController = Location();
+  bool isPickUpCustomer = false;
+  // final Location _locationController = Location();
   GoogleService googleService = GoogleService();
   var controller = TextEditingController();
 
@@ -38,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   LatLng fixLocationDriver =
       const LatLng(10.763932849773887, 106.6817367439953);
-  LatLng l2 = LatLng(10.764032849773887, 106.6818367439953);
 
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
@@ -167,7 +167,73 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {});
       } else {
         DialogUtils.showDialogNotfication(
-            context, "Xảy ra lỗi khi hủy chuyến", Icons.error);
+            context, true, "Xảy ra lỗi khi hủy chuyến", Icons.error);
+      }
+    });
+  }
+
+  void pickCustomer() async {
+    if (isPickUpCustomer) {
+      Widget okButton = TextButton(
+          style: ButtonStyleHandle.bts_1,
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text(
+            "OK",
+            style: TextStyle(color: ColorPalette.white),
+          ));
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text("Thông Báo",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: ColorPalette.primaryColor)),
+              content: const Text(
+                "Bạn không thể nhấn lần thứ hai",
+                textAlign: TextAlign.center,
+              ),
+              actions: [okButton],
+              actionsAlignment: MainAxisAlignment.center,
+              icon: const Icon(
+                Icons.perm_device_information,
+                size: 50,
+                color: ColorPalette.primaryColor,
+              ),
+            );
+          });
+      return;
+    }
+    mainService.pickUpCustomer(_messagingService.getTripId()).then((res) {
+      final body = jsonDecode(res);
+      String status = body["status"];
+      if (status == "OK") {
+        DialogUtils.showDialogNotfication(context, false,
+            "Đã cập trạng thái sang đón khách", Icons.done_outline);
+        setState(() {
+          isPickUpCustomer = true;
+        });
+      } else {
+        DialogUtils.showDialogNotfication(
+            context, true, "Đã xảy ra lỗi", Icons.error);
+      }
+    });
+  }
+
+  void completeTrip() async {
+    Navigator.pop(context);
+    mainService.conpleteTrip(_messagingService.getTripId()).then((res) {
+      final body = jsonDecode(res);
+      String status = body["status"];
+      if (status == "OK") {
+        DialogUtils.showDialogNotfication(
+            context, false, "Đã hoàn thành chuyến", Icons.done_outline);
+        _messagingService.reset();
+        setState(() {});
+      } else {
+        DialogUtils.showDialogNotfication(
+            context, true, "Đã xảy ra lỗi", Icons.error);
       }
     });
   }
@@ -181,8 +247,8 @@ class _HomeScreenState extends State<HomeScreen> {
           expand: false,
           builder: (_, controller) {
             return Container(
-                padding: EdgeInsets.all(ds_2),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(ds_2),
+                decoration: const BoxDecoration(
                     color: ColorPalette.white,
                     borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(ds_1),
@@ -201,11 +267,41 @@ class _HomeScreenState extends State<HomeScreen> {
                             const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorPalette.primaryColor,
+                            backgroundColor: ColorPalette.red,
                           ),
                           onPressed: cancel,
                           child: Text(
                             "Hủy Chuyến",
+                            style: MainStyle.textStyle5,
+                          ),
+                        )),
+                    Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 18,
+                        margin:
+                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorPalette.primaryColor,
+                          ),
+                          onPressed: pickCustomer,
+                          child: Text(
+                            "Đón Khách",
+                            style: MainStyle.textStyle5,
+                          ),
+                        )),
+                    Container(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height / 18,
+                        margin:
+                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ColorPalette.primaryColor,
+                          ),
+                          onPressed: completeTrip,
+                          child: Text(
+                            "Hoàn Thành Chuyến",
                             style: MainStyle.textStyle5,
                           ),
                         )),
@@ -252,7 +348,7 @@ class _HomeScreenState extends State<HomeScreen> {
             : FloatingActionButton(
                 backgroundColor: ColorPalette.primaryColor,
                 onPressed: _showSheet,
-                child: Icon(
+                child: const Icon(
                   Icons.keyboard_double_arrow_up_outlined,
                   color: ColorPalette.white,
                 )),
