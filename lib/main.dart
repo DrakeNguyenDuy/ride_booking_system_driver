@@ -12,41 +12,11 @@ void main() async {
   runApp(const MyApp());
   // // await FlutterConfig.loadEnvVariables();
   await Firebase.initializeApp();
-  // messaging = FirebaseMessaging.instance;
-  // await messaging.requestPermission(
-  //   alert: true,
-  //   announcement: false,
-  //   badge: true,
-  //   carPlay: false,
-  //   criticalAlert: false,
-  //   provisional: false,
-  //   sound: true,
-  // );
-  // await messaging.setForegroundNotificationPresentationOptions(
-  //   alert: true,
-  //   badge: true,
-  //   sound: true,
-  // );
-  // registerNotification();
 }
-
-// void registerNotification() async {
-//   await Firebase.initializeApp();
-//   final FirebaseMessaging messaging = FirebaseMessaging.instance;
-//   messaging.setForegroundNotificationPresentationOptions(
-//       alert: true, badge: true, sound: true);
-//   messaging.getToken().then((value) async {
-//     await SharedPreferences.getInstance().then((ins) {
-//       ins.setString(Varibales.TOKEN_FIREBASE, value!);
-//     });
-//   });
-// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
   // This widget is the root of your application.
-  // static var messageService =
-  //     MessageService().init(navigatorKey.currentContext);
 
   @override
   MaterialApp build(BuildContext context) {

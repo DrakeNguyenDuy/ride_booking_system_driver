@@ -24,6 +24,7 @@ class MessageService {
 
   static String titleCancelRide = "Chuyến đi đã bị hủy bởi khách hàng!";
   static String titleNewRide = "Bạn nhận được một cuốc xe mới!";
+  static String titleRating = "Khách hàng có 1 đánh giá cho bạn!";
 
   static String pick = "";
   static String des = "";
@@ -83,7 +84,9 @@ class MessageService {
           String? title = message.notification!.title;
           if (title == titleCancelRide) {
             showDialogCancelRide(title!, message.notification!.body);
-          } else {
+          } else if (title == titleRating) {
+            showDialogRated(title!, message.notification!.body);
+          } else if (title == titleNewRide) {
             showDialogNewRide(title!, message.notification!.body);
           }
         }
@@ -117,28 +120,18 @@ class MessageService {
     }
   }
 
-  void accecpRide(int tripId, BuildContext context) async {
-    // Navigator.of(context).pop();
+  void accecpRide(int tripId) async {
     await SharedPreferences.getInstance().then((ins) {
+      Navigator.of(navigatorKey.currentContext!).pop();
       int idUser = ins.getInt(Varibales.DRIVER_ID)!;
       String tokenFirebase = ins.getString(Varibales.TOKEN_FIREBASE)!;
       personService
           .accecptRide(idUser, tokenFirebase, tripId)
           .then((res) async {
         if (res.statusCode == HttpStatus.ok) {
-          // DialogUtils.showDialogNotfication(
-          //     context, "Chấp nhận cuốc thành công", Icons.done);
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            // Navigator.pushAndRemoveUntil(
-            //     context,
-            //     MaterialPageRoute(builder: (_) => const HomeScreen()),
-            // (route) => false);
-            Navigator.of(context).pushNamed("/home").then((value) async {
-              Navigator.of(context).pop();
-            });
-          });
+          Navigator.of(navigatorKey.currentContext!).pushNamed("/home");
         } else {
-          DialogUtils.showDialogNotfication(context, true,
+          DialogUtils.showDialogNotfication(navigatorKey.currentContext!, true,
               "Xảy ra lỗi khi nhận chuyến đi", Icons.error_outline);
         }
       });
@@ -258,7 +251,7 @@ class MessageService {
               TextButton(
                 style: ButtonStyleHandle.bts_1,
                 onPressed: () {
-                  accecpRide(int.parse(tripId), context);
+                  accecpRide(int.parse(tripId));
                 },
                 child: const Text('Chấp nhận',
                     style: TextStyle(color: ColorPalette.white)),
@@ -341,6 +334,82 @@ class MessageService {
               ),
             ],
             icon: const Icon(Icons.notification_important,
+                size: 50, color: ColorPalette.primaryColor),
+            actionsAlignment: MainAxisAlignment.spaceAround,
+            shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(25))),
+          ),
+        );
+      },
+    );
+  }
+
+  void showDialogRated(String title, dynamic body) {
+    Map<String, dynamic> notificationData = jsonDecode(body);
+    showDialog(
+      context: navigatorKey.currentContext!,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: AlertDialog(
+            title: Text(title),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RichText(
+                  textDirection: TextDirection.ltr,
+                  textAlign: TextAlign.left,
+                  text: TextSpan(
+                    text: 'Mã chuyến đi: ',
+                    style: MainStyle.textStyle2.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: notificationData["Mã chuyến đi"],
+                          style: MainStyle.textStyle2.copyWith(
+                            fontSize: 16,
+                            color: Colors.black,
+                          )),
+                    ],
+                  ),
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: 'Số sao đánh giá: ',
+                    style: MainStyle.textStyle2.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black),
+                    children: <TextSpan>[
+                      TextSpan(
+                          text: notificationData["Đánh giá"],
+                          style: MainStyle.textStyle2.copyWith(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.normal)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                style: ButtonStyleHandle.bts_1,
+                onPressed: () {
+                  reset();
+                  Navigator.of(context).pushNamed("/home");
+                },
+                child: const Text(
+                  "OK",
+                  style: TextStyle(color: ColorPalette.white),
+                ),
+              ),
+            ],
+            icon: const Icon(Icons.stars_outlined,
                 size: 50, color: ColorPalette.primaryColor),
             actionsAlignment: MainAxisAlignment.spaceAround,
             shape: const RoundedRectangleBorder(
