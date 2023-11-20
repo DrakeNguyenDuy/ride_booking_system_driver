@@ -25,11 +25,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final double zoom = 18.0;
   double price = 0;
-  late GoogleMapController mapController;
-  bool isPickUpCustomer = false;
+  // late GoogleMapController mapController;
   // final Location _locationController = Location();
   GoogleService googleService = GoogleService();
   var controller = TextEditingController();
+  bool isShowComplete = false;
 
   MainService mainService = MainService();
 
@@ -51,7 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _messagingService.init();
+    if (mounted) {
+      _messagingService.init();
+    }
   }
 
   //move camera to new position by position search
@@ -80,7 +82,6 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget okButton = TextButton(
         style: ButtonStyleHandle.bts_1,
         onPressed: () {
-          Navigator.of(context).pop();
           cancelRide();
         },
         child: const Text(
@@ -162,7 +163,8 @@ class _HomeScreenState extends State<HomeScreen> {
         .then((res) async {
       if (res.statusCode == HttpStatus.ok) {
         Navigator.pop(context);
-        Fluttertoast.showToast(msg: "Hủy chuyến thành công");
+        DialogUtils.showDialogNotfication(
+            context, false, "Hủy chuyến thành công", Icons.done);
         _messagingService.reset();
         setState(() {});
       } else {
@@ -173,46 +175,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void pickCustomer() async {
-    if (isPickUpCustomer) {
-      Widget okButton = TextButton(
-          style: ButtonStyleHandle.bts_1,
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text(
-            "OK",
-            style: TextStyle(color: ColorPalette.white),
-          ));
-      showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text("Thông Báo",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: ColorPalette.primaryColor)),
-              content: const Text(
-                "Bạn không thể nhấn lần thứ hai",
-                textAlign: TextAlign.center,
-              ),
-              actions: [okButton],
-              actionsAlignment: MainAxisAlignment.center,
-              icon: const Icon(
-                Icons.perm_device_information,
-                size: 50,
-                color: ColorPalette.primaryColor,
-              ),
-            );
-          });
-      return;
-    }
-    mainService.pickUpCustomer(_messagingService.getTripId()).then((res) {
+    mainService.pickUpCustomer(_messagingService.getTripId()).then((res) async {
       final body = jsonDecode(res);
       String status = body["status"];
       if (status == "OK") {
         DialogUtils.showDialogNotfication(context, false,
             "Đã cập trạng thái sang đón khách", Icons.done_outline);
         setState(() {
-          isPickUpCustomer = true;
+          isShowComplete = true;
         });
       } else {
         DialogUtils.showDialogNotfication(
@@ -222,95 +192,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void completeTrip() async {
-    Navigator.pop(context);
-    mainService.conpleteTrip(_messagingService.getTripId()).then((res) {
+    mainService.conpleteTrip(_messagingService.getTripId()).then((res) async {
       final body = jsonDecode(res);
       String status = body["status"];
-      if (status == "OK") {
+      if (status == "OK" && mounted) {
         DialogUtils.showDialogNotfication(
             context, false, "Đã hoàn thành chuyến", Icons.done_outline);
         _messagingService.reset();
         setState(() {});
       } else {
-        DialogUtils.showDialogNotfication(
-            context, true, "Đã xảy ra lỗi", Icons.error);
+        if (mounted) {
+          DialogUtils.showDialogNotfication(
+              context, true, "Đã xảy ra lỗi", Icons.error);
+        }
       }
     });
-  }
-
-  void _showSheet() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true, // set this to true
-      builder: (_) {
-        return DraggableScrollableSheet(
-          expand: false,
-          builder: (_, controller) {
-            return Container(
-                padding: const EdgeInsets.all(ds_2),
-                decoration: const BoxDecoration(
-                    color: ColorPalette.white,
-                    borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(ds_1),
-                        topRight: Radius.circular(ds_1))),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    renderText("Mã chuyến đi", _messagingService.getTripId()),
-                    renderText("Điểm đón", _messagingService.getPick()),
-                    renderText("Điểm trả", _messagingService.getDes()),
-                    renderText("Gía", _messagingService.getPrice()),
-                    Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height / 18,
-                        margin:
-                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorPalette.red,
-                          ),
-                          onPressed: cancel,
-                          child: Text(
-                            "Hủy Chuyến",
-                            style: MainStyle.textStyle5,
-                          ),
-                        )),
-                    Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height / 18,
-                        margin:
-                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorPalette.primaryColor,
-                          ),
-                          onPressed: pickCustomer,
-                          child: Text(
-                            "Đón Khách",
-                            style: MainStyle.textStyle5,
-                          ),
-                        )),
-                    Container(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height / 18,
-                        margin:
-                            const EdgeInsets.fromLTRB(ds_1, ds_1, ds_1, ds_1),
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: ColorPalette.primaryColor,
-                          ),
-                          onPressed: completeTrip,
-                          child: Text(
-                            "Hoàn Thành Chuyến",
-                            style: MainStyle.textStyle5,
-                          ),
-                        )),
-                  ],
-                ));
-          },
-        );
-      },
-    );
   }
 
   Widget renderText(String nameLable, dynamic value) {
@@ -333,6 +229,73 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget bottomSheet() {
+    return Container(
+      padding: const EdgeInsets.all(ds_1),
+      height: MediaQuery.sizeOf(context).height / 2,
+      decoration: BoxDecoration(
+          color: ColorPalette.white,
+          boxShadow: [
+            BoxShadow(
+                color: ColorPalette.primaryColor.withOpacity(0.2),
+                offset: const Offset(0, 1),
+                blurRadius: 2,
+                spreadRadius: 1)
+          ],
+          borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(25), topRight: Radius.circular(25))),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          renderText("Mã chuyến đi", _messagingService.getTripId()),
+          renderText("Điểm đón", _messagingService.getPick()),
+          renderText("Điểm trả", _messagingService.getDes()),
+          renderText("Gía", _messagingService.getPrice()),
+          SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height / 18,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: ColorPalette.red,
+                ),
+                onPressed: cancel,
+                child: Text(
+                  "Hủy Chuyến",
+                  style: MainStyle.textStyle5,
+                ),
+              )),
+          isShowComplete
+              ? SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 18,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorPalette.primaryColor,
+                    ),
+                    onPressed: completeTrip,
+                    child: Text(
+                      "Hoàn Thành Chuyến",
+                      style: MainStyle.textStyle5,
+                    ),
+                  ))
+              : SizedBox(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height / 18,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ColorPalette.primaryColor,
+                    ),
+                    onPressed: pickCustomer,
+                    child: Text(
+                      "Đón Khách",
+                      style: MainStyle.textStyle5,
+                    ),
+                  ))
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -341,17 +304,11 @@ class _HomeScreenState extends State<HomeScreen> {
         useMaterial3: true,
       ),
       home: Scaffold(
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
         floatingActionButton: _messagingService.getLatitudeDes() == 0 &&
                 _messagingService.getLongtitudeDes() == 0
             ? null
-            : FloatingActionButton(
-                backgroundColor: ColorPalette.primaryColor,
-                onPressed: _showSheet,
-                child: const Icon(
-                  Icons.keyboard_double_arrow_up_outlined,
-                  color: ColorPalette.white,
-                )),
+            : bottomSheet(),
         body: GoogleMap(
           onMapCreated: _onMapCreated,
           initialCameraPosition: CameraPosition(
@@ -363,5 +320,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    controller.dispose();
+    // mapController.dispose();
   }
 }

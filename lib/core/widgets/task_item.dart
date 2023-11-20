@@ -41,7 +41,7 @@ class _TaskItemState extends State<TaskItem> {
       margin: const EdgeInsets.only(
           top: ds_1 * 2, bottom: ds_1 * 2, left: ds_1 * 2, right: ds_1 * 2),
       width: 200,
-      height: 160,
+      height: MediaQuery.sizeOf(context).height / 5,
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(borderRadius)),
           boxShadow: [
