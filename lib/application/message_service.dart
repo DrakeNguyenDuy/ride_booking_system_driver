@@ -21,6 +21,8 @@ class MessageService {
   late BitmapDescriptor myIcon;
   static double latitudeDes = 0;
   static double longtitudeDes = 0;
+  static double latitudePick = 0;
+  static double longtitudePick = 0;
 
   static String titleCancelRide = "Chuyến đi đã bị hủy bởi khách hàng!";
   static String titleNewRide = "Bạn nhận được một cuốc xe mới!";
@@ -142,6 +144,8 @@ class MessageService {
     Map<String, dynamic> notificationData = jsonDecode(body);
     latitudeDes = double.parse(notificationData["Vĩ độ điểm đến"]);
     longtitudeDes = double.parse(notificationData["Kinh độ điểm đến"]);
+    latitudePick = double.parse(notificationData["Vĩ độ điểm đón"]);
+    longtitudePick = double.parse(notificationData["Kinh độ điểm đón"]);
     tripId = notificationData["Mã chuyến đi"];
     pick = notificationData["Điểm đón khách"];
     des = notificationData["Điểm trả khách"];
@@ -241,7 +245,7 @@ class MessageService {
               TextButton(
                 style: ButtonStyleHandle.bts_1,
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  Navigator.pop(context);
                 },
                 child: const Text(
                   "Từ chối",
@@ -422,6 +426,8 @@ class MessageService {
 
   double getLatitudeDes() => latitudeDes;
   double getLongtitudeDes() => longtitudeDes;
+  double getLatitudePick() => latitudePick;
+  double getLongtitudePick() => longtitudePick;
 
   String getTripId() => tripId;
   String getDes() => des;
@@ -433,5 +439,7 @@ class MessageService {
   void reset() {
     latitudeDes = 0;
     longtitudeDes = 0;
+    latitudePick = 0;
+    longtitudePick = 0;
   }
 }
