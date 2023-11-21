@@ -1,9 +1,10 @@
+// ignore_for_file: deprecated_member_use
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
 import 'package:ride_booking_system_driver/application/main_service.dart';
@@ -13,6 +14,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/dimension_co
 import 'package:ride_booking_system_driver/core/style/button_style.dart';
 import 'package:ride_booking_system_driver/core/style/main_style.dart';
 import 'package:ride_booking_system_driver/core/utils/dialog_utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   // static String routeName = "/home";
@@ -23,7 +25,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final double zoom = 18.0;
+  final double zoom = 16.0;
   double price = 0;
   // late GoogleMapController mapController;
   // final Location _locationController = Location();
@@ -54,6 +56,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       _messagingService.init();
     }
+    // if (_messagingService.getLatitudePick() != 0 &&
+    //     _messagingService.getLongtitudePick() != 0 &&
+    //     isShowComplete) {
+    //   cameraToPosition(LatLng(_messagingService.getLatitudePick(),
+    //       _messagingService.getLongtitudePick()));
+    // }
   }
 
   //move camera to new position by position search
@@ -82,6 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Widget okButton = TextButton(
         style: ButtonStyleHandle.bts_1,
         onPressed: () {
+          Navigator.pop(context);
           cancelRide();
         },
         child: const Text(
@@ -131,8 +140,19 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Set<Marker> renderMarker() {
-    if (_messagingService.getLatitudeDes() != 0 &&
-        _messagingService.getLongtitudeDes() != 0) {
+    if (_messagingService.getLatitudePick() != 0 &&
+        _messagingService.getLongtitudePick() != 0 &&
+        isShowComplete) {
+      return {
+        Marker(
+          markerId: const MarkerId("location2"),
+          position: LatLng(_messagingService.getLatitudePick(),
+              _messagingService.getLongtitudePick()),
+          icon: _messagingService.getMarker(),
+        )
+      };
+    } else if (_messagingService.getLatitudePick() != 0 &&
+        _messagingService.getLongtitudePick() != 0) {
       return {
         Marker(
           markerId: const MarkerId("location2"),
@@ -141,10 +161,10 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         Marker(
           markerId: const MarkerId("location2"),
-          position: LatLng(_messagingService.getLatitudeDes(),
-              _messagingService.getLongtitudeDes()),
+          position: LatLng(_messagingService.getLatitudePick(),
+              _messagingService.getLongtitudePick()),
           icon: _messagingService.getMarker(),
-        )
+        ),
       };
     } else {
       return {
@@ -162,11 +182,13 @@ class _HomeScreenState extends State<HomeScreen> {
         .cancelRide(int.parse(_messagingService.getTripId()), controller.text)
         .then((res) async {
       if (res.statusCode == HttpStatus.ok) {
-        Navigator.pop(context);
+        // Navigator.pop(context);
         DialogUtils.showDialogNotfication(
             context, false, "Hủy chuyến thành công", Icons.done);
         _messagingService.reset();
-        setState(() {});
+        setState(() {
+          isShowComplete = false;
+        });
       } else {
         DialogUtils.showDialogNotfication(
             context, true, "Xảy ra lỗi khi hủy chuyến", Icons.error);
@@ -181,6 +203,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (status == "OK") {
         DialogUtils.showDialogNotfication(context, false,
             "Đã cập trạng thái sang đón khách", Icons.done_outline);
+        openMap();
         setState(() {
           isShowComplete = true;
         });
@@ -199,7 +222,9 @@ class _HomeScreenState extends State<HomeScreen> {
         DialogUtils.showDialogNotfication(
             context, false, "Đã hoàn thành chuyến", Icons.done_outline);
         _messagingService.reset();
-        setState(() {});
+        setState(() {
+          isShowComplete = false;
+        });
       } else {
         if (mounted) {
           DialogUtils.showDialogNotfication(
@@ -207,6 +232,19 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       }
     });
+  }
+
+  Future<void> openMap() async {
+    var uri = Uri.parse(
+        "google.navigation:q=${_messagingService.getLatitudeDes()},${_messagingService.getLongtitudeDes()}&mode=d");
+    // var uri = Uri.parse(
+    //     "http://maps.google.com/maps?saddr=${_messagingService.getLatitudePick()},${_messagingService.getLongtitudePick()}&daddr=${_messagingService.getLatitudeDes()},${_messagingService.getLongtitudeDes()}&directionsmode=driving");
+    if (await canLaunch(uri.toString())) {
+      await launch(uri.toString());
+    } else {
+      DialogUtils.showDialogNotfication(
+          context, true, "Không thể mở Google Map", Icons.error);
+    }
   }
 
   Widget renderText(String nameLable, dynamic value) {
