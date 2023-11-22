@@ -90,6 +90,8 @@ class MessageService {
             showDialogRated(title!, message.notification!.body);
           } else if (title == titleNewRide) {
             showDialogNewRide(title!, message.notification!.body);
+          } else {
+            showDialogNewRide(title!, message.notification!.body);
           }
         }
       }
