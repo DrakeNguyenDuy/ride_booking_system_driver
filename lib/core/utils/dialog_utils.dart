@@ -21,7 +21,7 @@ class DialogUtils {
         context: context,
         builder: (BuildContext buildContext) {
           return AlertDialog(
-            title: Text(isError ? "Lỗi" : "Chúc mừng",
+            title: Text(isError ? "Lỗi" : "Thông Báo",
                 style: const TextStyle(fontSize: 25)),
             content: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
