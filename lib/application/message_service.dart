@@ -133,6 +133,12 @@ class MessageService {
           .accecptRide(idUser, tokenFirebase, tripId)
           .then((res) async {
         if (res.statusCode == HttpStatus.ok) {
+          final body = jsonDecode(res.body);
+          if (body["message"] == "Failed") {
+            DialogUtils.showDialogNotfication(navigatorKey.currentContext!,
+                false, body["data"], Icons.message);
+            return;
+          }
           Navigator.of(navigatorKey.currentContext!).pushNamed("/home");
         } else {
           DialogUtils.showDialogNotfication(navigatorKey.currentContext!, true,
