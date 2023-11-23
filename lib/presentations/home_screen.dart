@@ -288,6 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
           renderText("Mã chuyến đi", _messagingService.getTripId()),
           renderText("Điểm đón", _messagingService.getPick()),
           renderText("Điểm trả", _messagingService.getDes()),
+          renderText(
+              "Số điện thoại khách", _messagingService.getPhoneCustomer()),
           renderText("Gía", _messagingService.getPrice()),
           SizedBox(
               width: MediaQuery.of(context).size.width,
