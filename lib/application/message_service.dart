@@ -158,6 +158,7 @@ class MessageService {
     pick = notificationData["Điểm đón khách"];
     des = notificationData["Điểm trả khách"];
     priceTrip = notificationData["Giá cuốc xe"];
+    phoneCustomer = notificationData["Số điện thoại"];
     showDialog(
       context: navigatorKey.currentContext!,
       barrierDismissible: false,
@@ -216,6 +217,24 @@ class MessageService {
                     children: <TextSpan>[
                       TextSpan(
                         text: des,
+                        style: MainStyle.textStyle2.copyWith(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.normal),
+                      ),
+                    ],
+                  ),
+                ),
+                RichText(
+                  text: TextSpan(
+                    text: 'Số điện thoại khách: ',
+                    style: MainStyle.textStyle2.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: Colors.black),
+                    children: <TextSpan>[
+                      TextSpan(
+                        text: phoneCustomer,
                         style: MainStyle.textStyle2.copyWith(
                             fontSize: 16,
                             color: Colors.black,
@@ -441,6 +460,7 @@ class MessageService {
   String getDes() => des;
   String getPick() => pick;
   String getPrice() => priceTrip;
+  String getPhoneCustomer() => phoneCustomer;
 
   BitmapDescriptor getMarker() => myIcon;
 
