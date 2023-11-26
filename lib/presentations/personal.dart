@@ -4,19 +4,19 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ride_booking_system_driver/application/authentication_service.dart';
+import 'package:ride_booking_system_driver/application/location_service.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/dimension_constanst.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/font_size_constanst.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
 import 'package:ride_booking_system_driver/core/style/text_style.dart';
-import 'package:ride_booking_system_driver/core/utils/function_utils.dart';
 import 'package:ride_booking_system_driver/presentations/edit_personal.dart';
 import 'package:ride_booking_system_driver/presentations/login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:image_picker/image_picker.dart';
 
 // import 'package:image_picker/image_picker.dart';
 
@@ -39,6 +39,7 @@ class _PersonalScreenState extends State<PersonalScreen> {
   String tokenFirebase = "";
   int idUser = -1;
   List<bool> _onOff = <bool>[true, false];
+  final _locationService = LocationService();
 
   AuthenticationService authenticationService = AuthenticationService();
   late IOWebSocketChannel channel;
@@ -162,36 +163,10 @@ class _PersonalScreenState extends State<PersonalScreen> {
 
   void onOffApp() async {
     if (_onOff.lastIndexOf(true, 1) == 1) {
-      disconnect();
+      _locationService.disconnect(idUser);
     } else {
-      FunctionUtils.connect(idUser);
-      streamBase();
+      _locationService.connect(idUser, tokenFirebase);
     }
-  }
-
-  void disconnect() async {
-    personalService.connect(idUser).then((res) async {
-      if (res.statusCode == HttpStatus.ok) {
-        Fluttertoast.showToast(
-            msg: "Đóng kết nối thành công", webPosition: "bottom");
-      } else {
-        Fluttertoast.showToast(msg: "Đã xảy ra lỗi", webPosition: "bottom");
-      }
-    });
-    FunctionUtils.changeStateConnect(false);
-  }
-
-  Future streamBase() async {
-    int timeStamp = DateTime.now().millisecondsSinceEpoch;
-    channel = IOWebSocketChannel.connect(
-      Uri.parse('ws://ridebookingsystem.ddns.net:9090/socketHandler'),
-    );
-    channel.sink.add(
-        '{"userId": $idUser, "latitude": 10.763932849773887, "longitude": 106.6817367439953, "token": "$tokenFirebase", "timestamp":$timeStamp}');
-    channel.stream.listen((message) {
-      print('Received: $message');
-    });
-    Future.delayed(const Duration(seconds: 5));
   }
 
   @override

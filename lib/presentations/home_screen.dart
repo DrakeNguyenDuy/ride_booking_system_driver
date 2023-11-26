@@ -5,8 +5,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:ride_booking_system_driver/application/common.config.dart';
 import 'package:ride_booking_system_driver/application/google_service.dart';
+import 'package:ride_booking_system_driver/application/location_service.dart';
 import 'package:ride_booking_system_driver/application/main_service.dart';
 import 'package:ride_booking_system_driver/application/message_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
@@ -14,6 +18,7 @@ import 'package:ride_booking_system_driver/core/constants/constants/dimension_co
 import 'package:ride_booking_system_driver/core/style/button_style.dart';
 import 'package:ride_booking_system_driver/core/style/main_style.dart';
 import 'package:ride_booking_system_driver/core/utils/dialog_utils.dart';
+import 'package:ride_booking_system_driver/core/widgets/loading.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -45,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
   final Completer<GoogleMapController> _mapControllerCompleter =
       Completer<GoogleMapController>();
 
+  final _locationService = LocationService();
+
   void _onMapCreated(GoogleMapController controller) {
     // mapController = controller;
     _mapControllerCompleter.complete(controller);
@@ -56,12 +63,26 @@ class _HomeScreenState extends State<HomeScreen> {
     if (mounted) {
       _messagingService.init();
     }
-    // if (_messagingService.getLatitudePick() != 0 &&
-    //     _messagingService.getLongtitudePick() != 0 &&
-    //     isShowComplete) {
-    //   cameraToPosition(LatLng(_messagingService.getLatitudePick(),
-    //       _messagingService.getLongtitudePick()));
-    // }
+    _locationService.getLocation(setStateAfter);
+    if (_locationService.getCurrentLocation() != null) {
+      cameraToPosition(_locationService.getCurrentLocation()!);
+    }
+    //draw line from driver to customer
+    if (_messagingService.getLatitudePick() != 0 &&
+        _messagingService.getLongtitudePick() != 0 &&
+        _locationService.getCurrentLocation() != null) {
+      getPolyPoint(
+              _locationService.getCurrentLocation()!.latitude,
+              _locationService.getCurrentLocation()!.longitude,
+              _messagingService.getLatitudePick(),
+              _messagingService.getLongtitudePick())
+          .then((coordinates) =>
+              {generatePolylineFromPoints(coordinates, Colors.blueAccent)});
+    }
+  }
+
+  void setStateAfter() async {
+    setState(() {});
   }
 
   //move camera to new position by position search
@@ -74,11 +95,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void generatePolylineFromPoints(List<LatLng> polylineCoordinates) async {
+  void generatePolylineFromPoints(
+      List<LatLng> polylineCoordinates, Color color) async {
     PolylineId polylineId = const PolylineId("loylineid");
     Polyline polyline = Polyline(
         polylineId: polylineId,
-        color: Colors.blue,
+        color: color,
         points: polylineCoordinates,
         width: 8);
     setState(() {
@@ -140,7 +162,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Set<Marker> renderMarker() {
-    if (_messagingService.getLatitudePick() != 0 &&
+    //render init marker location current
+    if (_locationService.getCurrentLocation() != null) {
+      return {
+        Marker(
+          markerId: const MarkerId("location2"),
+          position: _locationService.getCurrentLocation()!,
+          icon: BitmapDescriptor.defaultMarker,
+        ),
+      };
+    } else if (_messagingService.getLatitudePick() != 0 &&
         _messagingService.getLongtitudePick() != 0 &&
         isShowComplete) {
       return {
@@ -188,6 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _messagingService.reset();
         setState(() {
           isShowComplete = false;
+          polylinesMap = {};
         });
       } else {
         DialogUtils.showDialogNotfication(
@@ -203,7 +235,14 @@ class _HomeScreenState extends State<HomeScreen> {
       if (status == "OK") {
         DialogUtils.showDialogNotfication(context, false,
             "Đã cập trạng thái sang đón khách", Icons.done_outline);
-        openMap();
+        // openMap();
+        getPolyPoint(
+                _messagingService.getLatitudePick(),
+                _messagingService.getLongtitudePick(),
+                _messagingService.getLatitudeDes(),
+                _messagingService.getLongtitudeDes())
+            .then((coordinates) =>
+                {generatePolylineFromPoints(coordinates, ColorPalette.green)});
         setState(() {
           isShowComplete = true;
         });
@@ -224,6 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _messagingService.reset();
         setState(() {
           isShowComplete = false;
+          polylinesMap = {};
         });
       } else {
         if (mounted) {
@@ -349,17 +389,39 @@ class _HomeScreenState extends State<HomeScreen> {
                 _messagingService.getLongtitudeDes() == 0
             ? null
             : bottomSheet(),
-        body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: CameraPosition(
-            target: fixLocationDriver,
-            zoom: zoom,
-          ),
-          markers: renderMarker(),
-          polylines: Set<Polyline>.of(polylinesMap.values),
-        ),
+        body: _locationService.getCurrentLocation() == null
+            ? const LoadingWidget()
+            : GoogleMap(
+                onMapCreated: _onMapCreated,
+                initialCameraPosition: CameraPosition(
+                  target: _locationService.getCurrentLocation()!,
+                  zoom: zoom,
+                ),
+                markers: renderMarker(),
+                polylines: Set<Polyline>.of(polylinesMap.values),
+              ),
       ),
     );
+  }
+
+  Future<List<LatLng>> getPolyPoint(double latitudePick, double longtitudePick,
+      double latitudeDes, double longtitudeDes) async {
+    List<LatLng> polyPointCoordinates = [];
+    PolylinePoints polylinePoints = PolylinePoints();
+    PolylineResult polylineResult =
+        await polylinePoints.getRouteBetweenCoordinates(
+            CommonConfig.API_GOOGLE_KEY,
+            PointLatLng(latitudePick, longtitudePick),
+            PointLatLng(latitudeDes, longtitudeDes),
+            travelMode: TravelMode.driving);
+    if (polylineResult.points.isNotEmpty) {
+      for (var element in polylineResult.points) {
+        polyPointCoordinates.add(LatLng(element.latitude, element.longitude));
+      }
+    } else {
+      Fluttertoast.showToast(msg: "Lỗi khi vẽ đường đi");
+    }
+    return polyPointCoordinates;
   }
 
   @override

@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:ride_booking_system_driver/application/message_service.dart';
 import 'package:ride_booking_system_driver/application/personal_service.dart';
 import 'package:ride_booking_system_driver/core/constants/constants/color_constants.dart';
+import 'package:ride_booking_system_driver/core/constants/constants/font_size_constanst.dart';
 import 'package:ride_booking_system_driver/core/constants/variables.dart';
+import 'package:ride_booking_system_driver/core/style/main_style.dart';
 import 'package:ride_booking_system_driver/core/widgets/loading.dart';
 import 'package:ride_booking_system_driver/core/widgets/task_item.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +24,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   PersonService personService = PersonService();
   int idUser = 0;
   List<dynamic> itemHistorys = [];
+  bool isLoaded = false;
 
   final _messagingService = MessageService();
   @override
@@ -47,7 +50,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
         temp = body["data"];
       }
       setState(() {
-        itemHistorys = temp;
+        isLoaded = true;
+        if (temp.isNotEmpty) {
+          itemHistorys = temp;
+        }
       });
     });
   }
@@ -60,24 +66,34 @@ class _HistoryScreenState extends State<HistoryScreen> {
         appBar: AppBar(
             title: const Text("Lịch sử chuyến đi"),
             backgroundColor: ColorPalette.primaryColor),
-        body: itemHistorys.isEmpty
+        body: itemHistorys.isEmpty && isLoaded == false
             ? const Center(
                 child: LoadingWidget(),
               )
-            : SafeArea(
-                child: ListView.builder(
-                    itemCount: itemHistorys.length,
-                    itemBuilder: (ct, index) {
-                      return TaskItem(
-                          tripId: itemHistorys[index]["tripId"],
-                          from: itemHistorys[index]["pickupLocation"],
-                          to: itemHistorys[index]["destinationLocation"],
-                          price: itemHistorys[index]["price"],
-                          rating: itemHistorys[index]["rating"],
-                          driverName: itemHistorys[index]["customer"]["name"],
-                          phoneNumber: itemHistorys[index]["driver"]
-                              ["phoneNumber"],
-                          gender: itemHistorys[index]["customer"]["gender"]);
-                    })));
+            : itemHistorys.isEmpty && isLoaded
+                ? Center(
+                    child: Text(
+                      "Chưa có lịch sử",
+                      style: MainStyle.textStyle2.copyWith(
+                          color: ColorPalette.primaryColor, fontSize: fs_2),
+                    ),
+                  )
+                : SafeArea(
+                    child: ListView.builder(
+                        itemCount: itemHistorys.length,
+                        itemBuilder: (ct, index) {
+                          return TaskItem(
+                              tripId: itemHistorys[index]["tripId"],
+                              from: itemHistorys[index]["pickupLocation"],
+                              to: itemHistorys[index]["destinationLocation"],
+                              price: itemHistorys[index]["price"],
+                              rating: itemHistorys[index]["rating"],
+                              driverName: itemHistorys[index]["customer"]
+                                  ["name"],
+                              phoneNumber: itemHistorys[index]["driver"]
+                                  ["phoneNumber"],
+                              gender: itemHistorys[index]["customer"]
+                                  ["gender"]);
+                        })));
   }
 }
